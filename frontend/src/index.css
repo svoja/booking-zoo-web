@@ -1,0 +1,121 @@
+:root {
+  --color-bg: #f5f7f0;
+  --color-surface: #ffffff;
+  --color-primary: #4a7c59;
+  --color-primary-light: #6b9b6b;
+  --color-primary-dark: #2d5a3a;
+  --color-accent: #c4a35a;
+  --color-text: #2c3e2c;
+  --color-text-muted: #5a6b5a;
+  --color-border: #d4e0d4;
+  --font-sans: 'Prompt', sans-serif;
+  --radius: 12px;
+  --shadow: 0 2px 12px rgba(74, 124, 89, 0.08);
+  --shadow-hover: 0 4px 20px rgba(74, 124, 89, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(74, 124, 89, 0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba(196, 163, 90, 0.08), transparent);
+  color: var(--color-text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button {
+  font-family: var(--font-sans);
+  cursor: pointer;
+}
+
+input, select, textarea {
+  font-family: var(--font-sans);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.layout-header {
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  box-shadow: var(--shadow);
+}
+
+.layout-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: white;
+  text-decoration: none;
+}
+
+.logo:hover {
+  color: var(--color-bg);
+  text-decoration: none;
+}
+
+.logo-icon {
+  font-size: 1.5rem;
+}
+
+.layout-header nav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.layout-header nav a {
+  color: rgba(255,255,255,0.9);
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius);
+  text-decoration: none;
+}
+
+.layout-header nav a:hover,
+.layout-header nav a.active {
+  color: white;
+  background: rgba(255,255,255,0.2);
+  text-decoration: none;
+}
+
+.layout-main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+@media print {
+  body {
+    background: white;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

@@ -1,0 +1,142 @@
+.page {
+  padding-bottom: 2rem;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.75rem;
+  color: var(--color-primary-dark);
+  margin: 0 0 0.25rem 0;
+}
+
+.titleIcon {
+  font-size: 1.5rem;
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+  margin: 0 0 1.25rem 0;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+.controls label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.labelText {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: var(--font-sans);
+  background: var(--color-surface);
+}
+
+.loading,
+.empty {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-text-muted);
+}
+
+.empty .hint {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  opacity: 0.9;
+}
+
+.days {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dayCard {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--color-border);
+}
+
+.dayHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.dayTitle {
+  font-size: 1.1rem;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.schoolCount {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.warn {
+  color: #b45309;
+  font-weight: 500;
+}
+
+.schoolList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.schoolItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.schoolItem:last-child {
+  border-bottom: none;
+}
+
+.schoolLink {
+  font-weight: 500;
+  color: var(--color-primary-dark);
+}
+
+.schoolLink:hover {
+  text-decoration: underline;
+}
+
+.counts {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.note {
+  font-size: 0.8rem;
+  color: #b45309;
+}

@@ -1,0 +1,12 @@
+{
+  "name": "zoo-booking-web",
+  "private": true,
+  "description": "ระบบจองเข้าชม สวนสัตว์เชียงใหม่",
+  "scripts": {
+    "install:all": "npm install && npm run install:all --prefix backend 2>/dev/null || (cd backend && npm install) && (cd frontend && npm install)",
+    "build": "cd frontend && npm run build",
+    "start": "node backend/server.js",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev"
+  }
+}

@@ -1,0 +1,168 @@
+.wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  font-family: var(--font-sans);
+}
+
+.toolbar {
+  margin-bottom: 1rem;
+}
+
+.noPrint {
+  display: block;
+}
+
+@media print {
+  .noPrint {
+    display: none !important;
+  }
+  .wrap {
+    padding: 0;
+  }
+  .letter {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
+
+.printBtn {
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.printBtn:hover {
+  background: var(--color-primary-dark);
+}
+
+.err {
+  color: #b91c1c;
+}
+
+.letter {
+  background: white;
+  padding: 2rem 2.5rem;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--color-border);
+  min-height: 80vh;
+}
+
+.letterHead {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.emblem {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 0.5rem;
+  border: 2px solid var(--color-text);
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  opacity: 0.9;
+}
+
+.letterTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.metaRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+
+.docId {
+  color: var(--color-text-muted);
+}
+
+.docDate {
+  color: var(--color-text);
+}
+
+.schoolBlock {
+  text-align: right;
+  margin-bottom: 1.5rem;
+}
+
+.schoolName {
+  font-weight: 600;
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+}
+
+.schoolAddr {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.toBlock {
+  margin-bottom: 1.25rem;
+  font-size: 0.95rem;
+}
+
+.toBlock p {
+  margin: 0.25rem 0;
+}
+
+.body {
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+}
+
+.body p {
+  margin: 0.75rem 0;
+  text-indent: 2rem;
+}
+
+.body p:first-child {
+  margin-top: 0;
+}
+
+.contactBlock {
+  margin: 1.5rem 0;
+  font-size: 0.95rem;
+}
+
+.contactBlock p {
+  margin: 0.35rem 0;
+}
+
+.signBlock {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+}
+
+.signLabel {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.95rem;
+}
+
+.signRole {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.footer {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.footer p {
+  margin: 0.25rem 0;
+}
