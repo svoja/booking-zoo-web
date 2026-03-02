@@ -39,26 +39,29 @@ npm run dev
 git init
 git add .
 git commit -m "Initial: zoo booking web"
-git remote add origin <URLของ repo เช่น https://github.com/username/zoo-booking-web.git>
+git remote add origin https://github.com/svoja/booking-zoo-web.git
 git branch -M main
 git push -u origin main
 ```
 
 ### 2) รันบน Server (หนึ่งเครื่องรันทั้งเว็บ + API)
 
-บนเซิร์ฟเวอร์ที่มี Node.js:
+**ตำแหน่งบน Ubuntu:** แนะนำ `/opt/zoo-booking-web`
 
 ```bash
-git clone <URL ของ repo>
-cd zoo-booking-web
+sudo git clone https://github.com/svoja/booking-zoo-web.git /opt/zoo-booking-web
+cd /opt/zoo-booking-web
+# ถ้ารันด้วย user ปกติ (ไม่ใช่ root) ให้โอนเจ้าของโฟลเดอร์
+# sudo chown -R $USER:$USER /opt/zoo-booking-web
+
 npm install
 cd backend && npm install && cd ..
 cd frontend && npm install && npm run build && cd ..
-set NODE_ENV=production
+export NODE_ENV=production
 npm start
 ```
 
-(บน Linux/macOS ใช้ `export NODE_ENV=production` แทน `set`)
+(บน Windows ใช้ `set NODE_ENV=production` แทน `export`)
 
 - แอปจะรันที่พอร์ต **3001** (หรือตามตัวแปร `PORT` ที่เซิร์ฟเวอร์กำหนด)
 - เปิดเบราว์เซอร์ที่ `http://<IP หรือ domain>:3001` จะได้ทั้งหน้าเว็บและ API

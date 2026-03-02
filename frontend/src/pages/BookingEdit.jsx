@@ -3,6 +3,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getBooking, updateBooking } from '../api';
 import styles from './BookingForm.module.css';
 
+const STUDENT_PRICE = 0;
+const TEACHER_PRICE = 0;
+
 export default function BookingEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -10,6 +13,14 @@ export default function BookingEdit() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const studentsCount = Number(form?.studentsCount) || 0;
+  const teachersCount = Number(form?.teachersCount) || 0;
+  const totalPeople = studentsCount + teachersCount;
+  const studentCost = studentsCount * STUDENT_PRICE;
+  const teacherCost = teachersCount * TEACHER_PRICE;
+  const totalCost = studentCost + teacherCost;
+  const formatCurrency = (value) =>
+    new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(value);
 
   useEffect(() => {
     getBooking(id)
@@ -130,6 +141,13 @@ export default function BookingEdit() {
               value={form.teachersCount}
               onChange={(e) => update('teachersCount', e.target.value)}
             />
+          </div>
+          <div className={styles.summary}>
+            <p className={styles.summaryTitle}>Summary</p>
+            <p>Students: {studentsCount} x {formatCurrency(STUDENT_PRICE)} = {formatCurrency(studentCost)}</p>
+            <p>Teachers/Guardians: {teachersCount} x {formatCurrency(TEACHER_PRICE)} = {formatCurrency(teacherCost)}</p>
+            <p>Total People: {totalPeople}</p>
+            <p className={styles.summaryTotal}>Total Cost: {formatCurrency(totalCost)}</p>
           </div>
         </section>
 

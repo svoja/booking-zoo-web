@@ -102,6 +102,31 @@
   grid-column: span 1;
 }
 
+.summary {
+  margin-top: 0.75rem;
+  padding: 0.85rem 1rem;
+  border: 1px dashed var(--color-border);
+  border-radius: 10px;
+  background: rgba(74, 124, 89, 0.05);
+}
+
+.summary p {
+  margin: 0.2rem 0;
+  font-size: 0.95rem;
+}
+
+.summaryTitle {
+  margin: 0 0 0.35rem 0;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+.summaryTotal {
+  margin-top: 0.4rem !important;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
 .checkboxes {
   display: flex;
   flex-wrap: wrap;
