@@ -3,6 +3,14 @@ import { Link } from 'react-router-dom';
 import { getBookings, deleteBooking } from '../api';
 import styles from './BookingList.module.css';
 
+const STUDENT_PRICE = 50;
+const TEACHER_PRICE = 100;
+const ADDONS = [
+  { key: 'serviceSnow', studentPrice: 130, teacherPrice: 230 },
+  { key: 'serviceDino', studentPrice: 50, teacherPrice: 70 },
+  { key: 'serviceWaterPark', studentPrice: 10, teacherPrice: 25 },
+];
+
 const statusLabels = {
   pending: 'รอดำเนินการ',
   approved: 'อนุมัติ',
@@ -14,6 +22,19 @@ export default function BookingList() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [deleteId, setDeleteId] = useState(null);
+  const formatCurrency = (value) =>
+    new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(value);
+
+  const calculateTotalPrice = (booking) => {
+    const students = Number(booking.studentsCount) || 0;
+    const teachers = Number(booking.teachersCount) || 0;
+    const baseCost = students * STUDENT_PRICE + teachers * TEACHER_PRICE;
+    const addonCost = ADDONS.reduce((sum, addon) => {
+      if (!booking[addon.key]) return sum;
+      return sum + students * addon.studentPrice + teachers * addon.teacherPrice;
+    }, 0);
+    return baseCost + addonCost;
+  };
 
   const load = async () => {
     setLoading(true);
@@ -89,6 +110,7 @@ export default function BookingList() {
                 น.ร. {b.studentsCount} / ครู {b.teachersCount}
                 {b.gradeLevel && ` · ${b.gradeLevel}`}
               </p>
+              <p className={styles.meta}>ราคารวม {formatCurrency(calculateTotalPrice(b))}</p>
               <p className={styles.contact}>
                 {b.contactName && `${b.contactName} · `}
                 {b.contactPhone1 || '-'}
