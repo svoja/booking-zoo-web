@@ -3,8 +3,28 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getBooking, updateBooking } from '../api';
 import styles from './BookingForm.module.css';
 
-const STUDENT_PRICE = 0;
-const TEACHER_PRICE = 0;
+const STUDENT_PRICE = 50;
+const TEACHER_PRICE = 100;
+const ADDONS = [
+  {
+    key: 'serviceSnow',
+    label: 'Snow Buddy Winter Land',
+    studentPrice: 130,
+    teacherPrice: 230,
+  },
+  {
+    key: 'serviceDino',
+    label: 'Dino Island',
+    studentPrice: 50,
+    teacherPrice: 70,
+  },
+  {
+    key: 'serviceWaterPark',
+    label: 'รถบริการภายในสวนสัตว์',
+    studentPrice: 10,
+    teacherPrice: 25,
+  },
+];
 
 export default function BookingEdit() {
   const { id } = useParams();
@@ -18,7 +38,21 @@ export default function BookingEdit() {
   const totalPeople = studentsCount + teachersCount;
   const studentCost = studentsCount * STUDENT_PRICE;
   const teacherCost = teachersCount * TEACHER_PRICE;
-  const totalCost = studentCost + teacherCost;
+  const baseCost = studentCost + teacherCost;
+  const addonSummaries = ADDONS
+    .filter((addon) => form?.[addon.key])
+    .map((addon) => {
+      const addonStudentCost = studentsCount * addon.studentPrice;
+      const addonTeacherCost = teachersCount * addon.teacherPrice;
+      return {
+        ...addon,
+        addonStudentCost,
+        addonTeacherCost,
+        addonTotalCost: addonStudentCost + addonTeacherCost,
+      };
+    });
+  const addonTotalCost = addonSummaries.reduce((sum, addon) => sum + addon.addonTotalCost, 0);
+  const totalCost = baseCost + addonTotalCost;
   const formatCurrency = (value) =>
     new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(value);
 
@@ -147,6 +181,13 @@ export default function BookingEdit() {
             <p>Students: {studentsCount} x {formatCurrency(STUDENT_PRICE)} = {formatCurrency(studentCost)}</p>
             <p>Teachers/Guardians: {teachersCount} x {formatCurrency(TEACHER_PRICE)} = {formatCurrency(teacherCost)}</p>
             <p>Total People: {totalPeople}</p>
+            <p>Base Cost: {formatCurrency(baseCost)}</p>
+            {addonSummaries.map((addon) => (
+              <p key={addon.key}>
+                Add-on {addon.label}: ({studentsCount} x {formatCurrency(addon.studentPrice)}) + ({teachersCount} x {formatCurrency(addon.teacherPrice)}) = {formatCurrency(addon.addonTotalCost)}
+              </p>
+            ))}
+            <p>Add-on Total: {formatCurrency(addonTotalCost)}</p>
             <p className={styles.summaryTotal}>Total Cost: {formatCurrency(totalCost)}</p>
           </div>
         </section>
@@ -164,7 +205,7 @@ export default function BookingEdit() {
             </label>
             <label className={styles.check}>
               <input type="checkbox" checked={form.serviceWaterPark} onChange={(e) => update('serviceWaterPark', e.target.checked)} />
-              <span>สวนน้ำ (Water Park)</span>
+              <span>รถบริการภายในสวนสัตว์</span>
             </label>
             <label className={styles.check}>
               <input type="checkbox" checked={form.serviceDino} onChange={(e) => update('serviceDino', e.target.checked)} />
