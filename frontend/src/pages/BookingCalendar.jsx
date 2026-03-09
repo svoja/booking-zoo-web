@@ -125,6 +125,7 @@ export default function BookingCalendar() {
                         </Link>
                         <span className={styles.counts}>
                           น.ร. {b.studentsCount} · ครู {b.teachersCount}
+                          {b.visitTime ? ` · เวลา ${b.visitTime}` : ''}
                         </span>
                         {overStudents && (
                           <span className={styles.note}>
