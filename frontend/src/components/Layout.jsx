@@ -10,6 +10,7 @@ export default function Layout() {
       <span>จองเข้าชม สวนสัตว์เชียงใหม่</span>
     </NavLink>
           <nav>
+            <NavLink to="/dashboard">แดชบอร์ด</NavLink>
             <NavLink to="/" end>ฟอร์มจอง</NavLink>
             <NavLink to="/list">รายการจอง</NavLink>
             <NavLink to="/calendar">รายการตามวัน</NavLink>

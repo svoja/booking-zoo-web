@@ -177,18 +177,18 @@ export default function BookingEdit() {
             />
           </div>
           <div className={styles.summary}>
-            <p className={styles.summaryTitle}>Summary</p>
-            <p>Students: {studentsCount} x {formatCurrency(STUDENT_PRICE)} = {formatCurrency(studentCost)}</p>
-            <p>Teachers/Guardians: {teachersCount} x {formatCurrency(TEACHER_PRICE)} = {formatCurrency(teacherCost)}</p>
-            <p>Total People: {totalPeople}</p>
-            <p>Base Cost: {formatCurrency(baseCost)}</p>
+            <p className={styles.summaryTitle}>สรุปรายการ</p>
+            <p>นักเรียน: {studentsCount} x {formatCurrency(STUDENT_PRICE)} = {formatCurrency(studentCost)}</p>
+            <p>ครู/ผู้ปกครอง: {teachersCount} x {formatCurrency(TEACHER_PRICE)} = {formatCurrency(teacherCost)}</p>
+            <p>รวมจำนวนคน: {totalPeople}</p>
+            <p>ค่าบริการพื้นฐาน: {formatCurrency(baseCost)}</p>
             {addonSummaries.map((addon) => (
               <p key={addon.key}>
-                Add-on {addon.label}: ({studentsCount} x {formatCurrency(addon.studentPrice)}) + ({teachersCount} x {formatCurrency(addon.teacherPrice)}) = {formatCurrency(addon.addonTotalCost)}
+                บริการเสริม {addon.label}: ({studentsCount} x {formatCurrency(addon.studentPrice)}) + ({teachersCount} x {formatCurrency(addon.teacherPrice)}) = {formatCurrency(addon.addonTotalCost)}
               </p>
             ))}
-            <p>Add-on Total: {formatCurrency(addonTotalCost)}</p>
-            <p className={styles.summaryTotal}>Total Cost: {formatCurrency(totalCost)}</p>
+            <p>รวมค่าบริการเสริม: {formatCurrency(addonTotalCost)}</p>
+            <p className={styles.summaryTotal}>ราคารวมทั้งหมด: {formatCurrency(totalCost)}</p>
           </div>
         </section>
 

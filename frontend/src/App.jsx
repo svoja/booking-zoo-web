@@ -6,6 +6,7 @@ import BookingDetail from './pages/BookingDetail';
 import BookingEdit from './pages/BookingEdit';
 import BookingCalendar from './pages/BookingCalendar';
 import PrintLetter from './pages/PrintLetter';
+import Dashboard from './pages/Dashboard';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="booking/:id" element={<BookingDetail />} />
           <Route path="booking/:id/edit" element={<BookingEdit />} />
           <Route path="calendar" element={<BookingCalendar />} />
+          <Route path="dashboard" element={<Dashboard />} />
         </Route>
       </Routes>
     </BrowserRouter>
