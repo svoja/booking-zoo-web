@@ -6,6 +6,7 @@ import styles from './BookingList.module.css';
 const STUDENT_PRICE = 50;
 const TEACHER_PRICE = 100;
 const ADDONS = [
+  { key: 'serviceAQ', studentPrice: 80, teacherPrice: 120 },
   { key: 'serviceSnow', studentPrice: 130, teacherPrice: 230 },
   { key: 'serviceDino', studentPrice: 50, teacherPrice: 70 },
   { key: 'serviceWaterPark', studentPrice: 10, teacherPrice: 25 },

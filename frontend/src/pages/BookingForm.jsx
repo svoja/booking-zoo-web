@@ -7,6 +7,12 @@ const STUDENT_PRICE = 50;
 const TEACHER_PRICE = 100;
 const ADDONS = [
   {
+    key: 'serviceAQ',
+    label: 'AQ (Chiangmai Zoo Aquarium)',
+    studentPrice: 80,
+    teacherPrice: 120,
+  },
+  {
     key: 'serviceSnow',
     label: 'Snow Buddy Winter Land',
     studentPrice: 130,
