@@ -218,10 +218,16 @@ export default function BookingEdit() {
           <h2>ข้อมูลการรับจอง</h2>
           <label>ผู้รับจอง (เจ้าหน้าที่)</label>
           <input type="text" value={form.receiverName} onChange={(e) => update('receiverName', e.target.value)} />
-          <label>วันที่รับจอง</label>
-          <input type="date" value={form.bookingReceivedAt} onChange={(e) => update('bookingReceivedAt', e.target.value)} />
-          <label>วันที่ไปเยือน (สำหรับเอกสาร)</label>
-          <input type="date" value={form.visitDate} onChange={(e) => update('visitDate', e.target.value)} />
+          <div className={styles.row2}>
+            <div>
+              <label>วันที่รับจอง</label>
+              <input type="date" value={form.bookingReceivedAt} onChange={(e) => update('bookingReceivedAt', e.target.value)} />
+            </div>
+            <div>
+              <label>วันที่ไปเยือน (สำหรับเอกสาร)</label>
+              <input type="date" value={form.visitDate} onChange={(e) => update('visitDate', e.target.value)} />
+            </div>
+          </div>
           <label>เวลา (สำหรับเอกสาร)</label>
           <input type="text" value={form.visitTime} onChange={(e) => update('visitTime', e.target.value)} placeholder="เช่น 08.00 น. เป็นต้นไป" />
           <label>หมายเหตุ</label>

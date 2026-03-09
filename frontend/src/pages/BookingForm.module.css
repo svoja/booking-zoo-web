@@ -69,6 +69,7 @@
 .card input,
 .card textarea {
   width: 100%;
+  min-width: 0;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -85,6 +86,7 @@
 
 .card select {
   width: 100%;
+  min-width: 0;
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: 8px;
@@ -189,7 +191,18 @@
 }
 
 @media (max-width: 520px) {
+  .card {
+    padding: 1rem;
+  }
+
   .row2 {
     grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .card input[type='date'] {
+    font-size: 0.95rem;
+    padding-left: 0.6rem;
+    padding-right: 0.6rem;
   }
 }

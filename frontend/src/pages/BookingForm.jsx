@@ -245,18 +245,24 @@ export default function BookingForm() {
             onChange={(e) => update('receiverName', e.target.value)}
             placeholder="ชื่อเจ้าหน้าที่ที่รับจอง"
           />
-          <label>วันที่รับจอง</label>
-          <input
-            type="date"
-            value={form.bookingReceivedAt}
-            onChange={(e) => update('bookingReceivedAt', e.target.value)}
-          />
-          <label>วันที่ไปเยือน (สำหรับเอกสาร)</label>
-          <input
-            type="date"
-            value={form.visitDate}
-            onChange={(e) => update('visitDate', e.target.value)}
-          />
+          <div className={styles.row2}>
+            <div>
+              <label>วันที่รับจอง</label>
+              <input
+                type="date"
+                value={form.bookingReceivedAt}
+                onChange={(e) => update('bookingReceivedAt', e.target.value)}
+              />
+            </div>
+            <div>
+              <label>วันที่ไปเยือน (สำหรับเอกสาร)</label>
+              <input
+                type="date"
+                value={form.visitDate}
+                onChange={(e) => update('visitDate', e.target.value)}
+              />
+            </div>
+          </div>
           <label>เวลา (สำหรับเอกสาร)</label>
           <input
             type="text"
