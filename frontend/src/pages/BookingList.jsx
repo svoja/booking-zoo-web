@@ -22,9 +22,18 @@ export default function BookingList() {
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState('bookingDateDesc');
   const [deleteId, setDeleteId] = useState(null);
+
   const formatCurrency = (value) =>
     new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(value);
+
+  const formatDate = (value) => {
+    if (!value) return '-';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return new Intl.DateTimeFormat('th-TH', { dateStyle: 'medium' }).format(date);
+  };
 
   const calculateTotalPrice = (booking) => {
     const students = Number(booking.studentsCount) || 0;
@@ -48,6 +57,21 @@ export default function BookingList() {
       setLoading(false);
     }
   };
+
+  const getDateValue = (value, fallback) => {
+    const time = value ? new Date(value).getTime() : NaN;
+    return Number.isNaN(time) ? fallback : time;
+  };
+
+  const sortedList = [...list].sort((a, b) => {
+    if (sortBy === 'bookingDateAsc') {
+      return getDateValue(a.bookingReceivedAt, Number.POSITIVE_INFINITY)
+        - getDateValue(b.bookingReceivedAt, Number.POSITIVE_INFINITY);
+    }
+
+    return getDateValue(b.bookingReceivedAt, Number.NEGATIVE_INFINITY)
+      - getDateValue(a.bookingReceivedAt, Number.NEGATIVE_INFINITY);
+  });
 
   useEffect(() => {
     load();
@@ -86,6 +110,14 @@ export default function BookingList() {
           placeholder="ค้นหา ชื่อโรงเรียน, ผู้ติดต่อ, เบอร์โทร, หมายเหตุ..."
           className={styles.searchInput}
         />
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className={styles.sortSelect}
+        >
+          <option value="bookingDateDesc">วันที่รับจอง: ใหม่ไปเก่า</option>
+          <option value="bookingDateAsc">วันที่รับจอง: เก่าไปใหม่</option>
+        </select>
         <button type="submit" className={styles.searchBtn}>ค้นหา</button>
       </form>
 
@@ -98,7 +130,7 @@ export default function BookingList() {
         </div>
       ) : (
         <div className={styles.grid}>
-          {list.map((b) => (
+          {sortedList.map((b) => (
             <article key={b.id} className={styles.card}>
               <div className={styles.cardHeader}>
                 <span className={styles.no}>#{b.id}</span>
@@ -111,6 +143,7 @@ export default function BookingList() {
                 น.ร. {b.studentsCount} / ครู {b.teachersCount}
                 {b.gradeLevel && ` · ${b.gradeLevel}`}
               </p>
+              <p className={styles.meta}>วันที่รับจอง {formatDate(b.bookingReceivedAt)}</p>
               <p className={styles.meta}>ราคารวม {formatCurrency(calculateTotalPrice(b))}</p>
               <p className={styles.contact}>
                 {b.contactName && `${b.contactName} · `}
@@ -122,7 +155,7 @@ export default function BookingList() {
                 {b.serviceWaterPark && <span>สวนน้ำ</span>}
                 {b.serviceDino && <span>Dino</span>}
                 {!b.serviceAQ && !b.serviceSnow && !b.serviceWaterPark && !b.serviceDino && (
-                  <span className={styles.noService}>—</span>
+                  <span className={styles.noService}>-</span>
                 )}
               </div>
               <div className={styles.actions}>
