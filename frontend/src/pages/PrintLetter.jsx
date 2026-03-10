@@ -1,16 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getBooking } from '../api';
-import styles from './PrintLetter.module.css';
 
-function toThaiDate(dateStr) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr + 'T12:00:00');
-  const thai = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
-  const day = d.getDate();
-  const month = thai[d.getMonth()];
-  const year = d.getFullYear() + 543;
-  return `${day} ${month} พ.ศ.${year}`;
+function toDateText(dateStr) {
+  if (!dateStr) return '-';
+  const d = new Date(`${dateStr}T12:00:00`);
+  return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }).format(d);
 }
 
 export default function PrintLetter() {
@@ -26,73 +21,74 @@ export default function PrintLetter() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handlePrint = () => window.print();
-
-  if (loading) return <div className={styles.wrap}><p>กำลังโหลด...</p></div>;
-  if (error) return <div className={styles.wrap}><p className={styles.err}>{error}</p></div>;
+  if (loading) return <div className="p-6 text-slate-500">Loading...</div>;
+  if (error) return <div className="p-6 text-rose-600">{error}</div>;
   if (!booking) return null;
 
-  const visitDateThai = booking.visitDate ? toThaiDate(booking.visitDate) : '';
-  const letterDate = toThaiDate(new Date().toISOString().slice(0, 10));
+  const visitDate = booking.visitDate ? toDateText(booking.visitDate) : '-';
+  const letterDate = toDateText(new Date().toISOString().slice(0, 10));
 
   return (
-    <div className={styles.wrap}>
-      <div className={`${styles.noPrint} ${styles.toolbar}`}>
-        <button type="button" onClick={handlePrint} className={styles.printBtn}>
-          🖨️ พิมพ์เอกสาร
+    <div className="mx-auto w-full max-w-[840px] p-4 print:max-w-none print:p-0">
+      <div className="mb-4 print:hidden">
+        <button
+          type="button"
+          onClick={() => window.print()}
+          className="rounded-lg bg-[#4a7c59] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2d5a3a]"
+        >
+          Print
         </button>
       </div>
 
-      <div className={styles.letter}>
-        <div className={styles.letterHead}>
-          <div className={styles.emblem} />
-          <p className={styles.letterTitle}>หนังสือขอเข้าร่วมโครงการ</p>
+      <article className="rounded-xl border border-[#d4e0d4] bg-white p-8 leading-7 text-slate-800 print:rounded-none print:border-0 print:shadow-none">
+        <header className="mb-6 text-center">
+          <h1 className="text-2xl font-bold text-[#2d5a3a]">Participation Request Letter</h1>
+          <p className="text-sm text-slate-500">Document No. EDU-04301.08/2024</p>
+        </header>
+
+        <div className="mb-6 flex items-center justify-between text-sm">
+          <span>To: Chiang Mai Zoo Director</span>
+          <span>Date: {letterDate}</span>
         </div>
 
-        <div className={styles.metaRow}>
-          <div className={styles.docId}>ที่ ศธ ๐๔๓๐๑.๐๘/๒๐๒๔</div>
-          <div className={styles.docDate}>วันที่ {letterDate}</div>
+        <div className="mb-6">
+          <p><strong>School:</strong> {booking.schoolName || '-'}</p>
+          <p><strong>Contact:</strong> {booking.contactName || '-'}</p>
+          <p><strong>Phone:</strong> {[booking.contactPhone1, booking.contactPhone2].filter(Boolean).join(' / ') || '-'}</p>
         </div>
 
-        <div className={styles.schoolBlock}>
-          <p className={styles.schoolName}>{booking.schoolName || 'ชื่อโรงเรียน'}</p>
-          <p className={styles.schoolAddr}>{booking.schoolName || 'ที่อยู่โรงเรียน'}</p>
-        </div>
-
-        <div className={styles.toBlock}>
-          <p><strong>เรียน</strong> ผู้อำนวยการสวนสัตว์เชียงใหม่</p>
-          <p><strong>เรื่อง</strong> ขอเข้าร่วมโครงการให้บริการความรู้ภายในสวนสัตว์เชียงใหม่ (Chiangmai Zoo Edzoocation)</p>
-        </div>
-
-        <div className={styles.body}>
+        <div className="space-y-4 text-sm">
           <p>
-            ด้วย{booking.schoolName || 'โรงเรียน'} มีความประสงค์จะนำนักเรียนเข้าร่วมโครงการให้บริการความรู้
-            ภายในสวนสัตว์เชียงใหม่ (Chiangmai Zoo Edzoocation) โดยมีรายละเอียดดังนี้
+            We would like to bring students to join educational activities at Chiang Mai Zoo.
+            Please find the booking details below.
           </p>
           <p>
-            จำนวนนักเรียน <strong>{booking.studentsCount ?? '—'} คน</strong> จำนวนครู/ผู้ปกครอง <strong>{booking.teachersCount ?? '—'} คน</strong>
-            จะเดินทางไปศึกษาดูงาน ณ สวนสัตว์เชียงใหม่ ใน{' '}
-            {visitDateThai ? <strong>วัน{visitDateThai}</strong> : 'วันที่ไปเยือน'}
-            {booking.visitTime ? ` เวลา ${booking.visitTime}` : ''}
+            Students: <strong>{booking.studentsCount ?? '-'}</strong> persons,
+            Teachers/Guardians: <strong>{booking.teachersCount ?? '-'}</strong> persons.
           </p>
-          <p>จึงเรียนมาเพื่อโปรดทราบ และขอความอนุเคราะห์ดำเนินการต่อไป</p>
+          <p>
+            Planned visit date: <strong>{visitDate}</strong>
+            {booking.visitTime ? <>, time <strong>{booking.visitTime}</strong></> : null}.
+          </p>
+          <p>
+            Requested services:
+            {' '}
+            {[
+              booking.serviceAQ ? 'AQ' : null,
+              booking.serviceSnow ? 'Snow Buddy' : null,
+              booking.serviceWaterPark ? 'Shuttle Bus' : null,
+              booking.serviceDino ? 'Dino Island' : null,
+            ].filter(Boolean).join(', ') || '-'}
+          </p>
+          {booking.remarks ? <p><strong>Remarks:</strong> {booking.remarks}</p> : null}
+          <p>Thank you for your consideration.</p>
         </div>
 
-        <div className={styles.contactBlock}>
-          <p><strong>ผู้ประสานงาน:</strong> {booking.contactName || '—'}</p>
-          <p><strong>เบอร์โทร:</strong> {[booking.contactPhone1, booking.contactPhone2].filter(Boolean).join(' / ') || '—'}</p>
-        </div>
-
-        <div className={styles.signBlock}>
-          <p className={styles.signLabel}>ลงชื่อ _______________________ ผู้ลงนาม</p>
-          <p className={styles.signRole}>(ผู้อำนวยการโรงเรียน)</p>
-        </div>
-
-        <div className={styles.footer}>
-          <p>ฝ่ายบริหารงานกิจการนักเรียน</p>
-          <p>โทร ๐๕๓-๑๑๒๑๘๐ อีเมล (ระบุตามโรงเรียน)</p>
-        </div>
-      </div>
+        <footer className="mt-16 text-right text-sm">
+          <p>Signature __________________________</p>
+          <p>School Director</p>
+        </footer>
+      </article>
     </div>
   );
 }

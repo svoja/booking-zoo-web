@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createBooking } from '../api';
-import styles from './BookingForm.module.css';
 
 const STUDENT_PRICE = 50;
 const TEACHER_PRICE = 100;
@@ -26,7 +25,7 @@ const ADDONS = [
   },
   {
     key: 'serviceWaterPark',
-    label: 'รถบริการภายในสวนสัตว์',
+    label: 'Zoo shuttle bus',
     studentPrice: 10,
     teacherPrice: 25,
   },
@@ -52,17 +51,23 @@ const defaultValues = {
   status: 'pending',
 };
 
+const cardClass = 'rounded-xl border border-[#d4e0d4] bg-white p-4 shadow-[0_2px_12px_rgba(74,124,89,0.08)]';
+const fieldClass = 'mt-1 w-full rounded-lg border border-[#d4e0d4] px-3 py-2 text-sm outline-none transition focus:border-[#4a7c59] focus:ring-2 focus:ring-[#4a7c59]/20';
+const labelClass = 'mt-3 block text-sm font-medium text-[#2d5a3a]';
+
 export default function BookingForm() {
   const navigate = useNavigate();
   const [form, setForm] = useState(defaultValues);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+
   const studentsCount = Number(form.studentsCount) || 0;
   const teachersCount = Number(form.teachersCount) || 0;
   const totalPeople = studentsCount + teachersCount;
   const studentCost = studentsCount * STUDENT_PRICE;
   const teacherCost = teachersCount * TEACHER_PRICE;
   const baseCost = studentCost + teacherCost;
+
   const addonSummaries = ADDONS
     .filter((addon) => form[addon.key])
     .map((addon) => {
@@ -70,13 +75,13 @@ export default function BookingForm() {
       const addonTeacherCost = teachersCount * addon.teacherPrice;
       return {
         ...addon,
-        addonStudentCost,
-        addonTeacherCost,
         addonTotalCost: addonStudentCost + addonTeacherCost,
       };
     });
+
   const addonTotalCost = addonSummaries.reduce((sum, addon) => sum + addon.addonTotalCost, 0);
   const totalCost = baseCost + addonTotalCost;
+
   const formatCurrency = (value) =>
     new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(value);
 
@@ -96,205 +101,200 @@ export default function BookingForm() {
       setForm(defaultValues);
       navigate(`/booking/${created.id}`);
     } catch (err) {
-      setError(err.message || 'เกิดข้อผิดพลาด');
+      setError(err.message || 'Failed to save booking');
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className={styles.page}>
-      <h1 className={styles.title}>
-        <span className={styles.titleIcon}>📋</span>
-        ฟอร์มจองเข้าชม
-      </h1>
-      <p className={styles.subtitle}>
-        กรอกข้อมูลโรงเรียนและผู้ประสานงาน เพื่อจองเข้าร่วมโครงการให้บริการความรู้ สวนสัตว์เชียงใหม่
-      </p>
+    <div className="pb-8">
+      <h1 className="mb-1 text-3xl font-bold text-[#2d5a3a]">Create Booking</h1>
+      <p className="mb-5 text-slate-600">Fill in school, contact, participants, and service details.</p>
 
-      <form onSubmit={handleSubmit} className={styles.form}>
-        {error && <div className={styles.error}>{error}</div>}
+      <form onSubmit={handleSubmit} className="grid gap-4">
+        {error ? <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</div> : null}
 
-        <section className={styles.card}>
-          <h2>ข้อมูลโรงเรียน</h2>
-          <label>
-            ชื่อ - ที่อยู่โรงเรียน / สังกัด <span className={styles.required}>*</span>
-          </label>
+        <section className={cardClass}>
+          <h2 className="text-base font-semibold text-[#2d5a3a]">School Information</h2>
+          <label className={labelClass}>School / Address / Organization *</label>
           <textarea
             value={form.schoolName}
             onChange={(e) => update('schoolName', e.target.value)}
-            placeholder="เช่น โรงเรียนตัวอย่าง อ.เมือง จ.เชียงใหม่"
+            placeholder="Example School, Muang District, Chiang Mai"
             rows={2}
             required
+            className={fieldClass}
           />
 
-          <label>ระดับชั้น</label>
+          <label className={labelClass}>Grade level</label>
           <input
             type="text"
             value={form.gradeLevel}
             onChange={(e) => update('gradeLevel', e.target.value)}
-            placeholder="เช่น ป.1-ป.3, อนุบาล, ม.6"
+            placeholder="e.g. Grade 1-3"
+            className={fieldClass}
           />
         </section>
 
-        <section className={styles.card}>
-          <h2>ผู้ประสานงาน (ขอไว้ 2 เบอร์)</h2>
-          <label>ชื่อผู้ประสานงาน</label>
+        <section className={cardClass}>
+          <h2 className="text-base font-semibold text-[#2d5a3a]">Contact Person</h2>
+          <label className={labelClass}>Name</label>
           <input
             type="text"
             value={form.contactName}
             onChange={(e) => update('contactName', e.target.value)}
-            placeholder="ชื่อ-นามสกุล"
+            placeholder="Full name"
+            className={fieldClass}
           />
-          <div className={styles.row2}>
-            <label>เบอร์โทร 1</label>
-            <label>เบอร์โทร 2</label>
-          </div>
-          <div className={styles.row2}>
-            <input
-              type="tel"
-              value={form.contactPhone1}
-              onChange={(e) => update('contactPhone1', e.target.value)}
-              placeholder="081-2345678"
-            />
-            <input
-              type="tel"
-              value={form.contactPhone2}
-              onChange={(e) => update('contactPhone2', e.target.value)}
-              placeholder="082-3456789"
-            />
+
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium text-[#2d5a3a]">Phone 1</label>
+              <input
+                type="tel"
+                value={form.contactPhone1}
+                onChange={(e) => update('contactPhone1', e.target.value)}
+                placeholder="081-2345678"
+                className={fieldClass}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#2d5a3a]">Phone 2</label>
+              <input
+                type="tel"
+                value={form.contactPhone2}
+                onChange={(e) => update('contactPhone2', e.target.value)}
+                placeholder="082-3456789"
+                className={fieldClass}
+              />
+            </div>
           </div>
         </section>
 
-        <section className={styles.card}>
-          <h2>จำนวนผู้เข้าร่วม</h2>
-          <div className={styles.row2}>
-            <label>จำนวนนักเรียน</label>
-            <label>จำนวนครู / ผู้ปกครอง</label>
+        <section className={cardClass}>
+          <h2 className="text-base font-semibold text-[#2d5a3a]">Participants</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="block text-sm font-medium text-[#2d5a3a]">Students</label>
+              <input
+                type="number"
+                min="0"
+                value={form.studentsCount}
+                onChange={(e) => update('studentsCount', e.target.value)}
+                placeholder="0"
+                className={fieldClass}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-[#2d5a3a]">Teachers/Guardians</label>
+              <input
+                type="number"
+                min="0"
+                value={form.teachersCount}
+                onChange={(e) => update('teachersCount', e.target.value)}
+                placeholder="0"
+                className={fieldClass}
+              />
+            </div>
           </div>
-          <div className={styles.row2}>
-            <input
-              type="number"
-              min="0"
-              value={form.studentsCount}
-              onChange={(e) => update('studentsCount', e.target.value)}
-              placeholder="0"
-            />
-            <input
-              type="number"
-              min="0"
-              value={form.teachersCount}
-              onChange={(e) => update('teachersCount', e.target.value)}
-              placeholder="0"
-            />
-          </div>
-          <div className={styles.summary}>
-            <p className={styles.summaryTitle}>สรุปรายการ</p>
-            <p>นักเรียน: {studentsCount} x {formatCurrency(STUDENT_PRICE)} = {formatCurrency(studentCost)}</p>
-            <p>ครู/ผู้ปกครอง: {teachersCount} x {formatCurrency(TEACHER_PRICE)} = {formatCurrency(teacherCost)}</p>
-            <p>รวมจำนวนคน: {totalPeople}</p>
-            <p>ค่าบริการพื้นฐาน: {formatCurrency(baseCost)}</p>
+
+          <div className="mt-4 rounded-lg border border-[#d4e0d4] bg-[#f7fbf6] p-3 text-sm text-slate-700">
+            <p className="font-semibold text-[#2d5a3a]">Cost Summary</p>
+            <p>Students: {studentsCount} x {formatCurrency(STUDENT_PRICE)} = {formatCurrency(studentCost)}</p>
+            <p>Teachers: {teachersCount} x {formatCurrency(TEACHER_PRICE)} = {formatCurrency(teacherCost)}</p>
+            <p>Total people: {totalPeople}</p>
+            <p>Base service: {formatCurrency(baseCost)}</p>
             {addonSummaries.map((addon) => (
               <p key={addon.key}>
-                บริการเสริม {addon.label}: ({studentsCount} x {formatCurrency(addon.studentPrice)}) + ({teachersCount} x {formatCurrency(addon.teacherPrice)}) = {formatCurrency(addon.addonTotalCost)}
+                Add-on {addon.label}: {formatCurrency(addon.addonTotalCost)}
               </p>
             ))}
-            <p>รวมค่าบริการเสริม: {formatCurrency(addonTotalCost)}</p>
-            <p className={styles.summaryTotal}>ราคารวมทั้งหมด: {formatCurrency(totalCost)}</p>
+            <p>Add-on total: {formatCurrency(addonTotalCost)}</p>
+            <p className="text-base font-bold text-[#2d5a3a]">Grand total: {formatCurrency(totalCost)}</p>
           </div>
         </section>
 
-        <section className={styles.card}>
-          <h2>บริการที่ต้องการ</h2>
-          <div className={styles.checkboxes}>
-            <label className={styles.check}>
-              <input
-                type="checkbox"
-                checked={form.serviceAQ}
-                onChange={(e) => update('serviceAQ', e.target.checked)}
-              />
-              <span>AQ (Chiangmai Zoo Aquarium)</span>
-            </label>
-            <label className={styles.check}>
-              <input
-                type="checkbox"
-                checked={form.serviceSnow}
-                onChange={(e) => update('serviceSnow', e.target.checked)}
-              />
-              <span>Snow Buddy Winter Land</span>
-            </label>
-            <label className={styles.check}>
-              <input
-                type="checkbox"
-                checked={form.serviceWaterPark}
-                onChange={(e) => update('serviceWaterPark', e.target.checked)}
-              />
-              <span>รถบริการภายในสวนสัตว์</span>
-            </label>
-            <label className={styles.check}>
-              <input
-                type="checkbox"
-                checked={form.serviceDino}
-                onChange={(e) => update('serviceDino', e.target.checked)}
-              />
-              <span>Dino Island</span>
-            </label>
+        <section className={cardClass}>
+          <h2 className="text-base font-semibold text-[#2d5a3a]">Services</h2>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            {ADDONS.map((addon) => (
+              <label key={addon.key} className="flex items-center gap-2 rounded-lg border border-[#d4e0d4] bg-[#f7fbf6] px-3 py-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={form[addon.key]}
+                  onChange={(e) => update(addon.key, e.target.checked)}
+                />
+                <span>{addon.label}</span>
+              </label>
+            ))}
           </div>
         </section>
 
-        <section className={styles.card}>
-          <h2>ข้อมูลการรับจอง</h2>
-          <label>ผู้รับจอง (เจ้าหน้าที่)</label>
+        <section className={cardClass}>
+          <h2 className="text-base font-semibold text-[#2d5a3a]">Booking Meta</h2>
+          <label className={labelClass}>Receiver name</label>
           <input
             type="text"
             value={form.receiverName}
             onChange={(e) => update('receiverName', e.target.value)}
-            placeholder="ชื่อเจ้าหน้าที่ที่รับจอง"
+            placeholder="Officer name"
+            className={fieldClass}
           />
-          <div className={styles.row2}>
+
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div>
-              <label>วันที่รับจอง</label>
+              <label className="block text-sm font-medium text-[#2d5a3a]">Received date</label>
               <input
                 type="date"
                 value={form.bookingReceivedAt}
                 onChange={(e) => update('bookingReceivedAt', e.target.value)}
+                className={fieldClass}
               />
             </div>
             <div>
-              <label>วันที่ไปเยือน (สำหรับเอกสาร)</label>
+              <label className="block text-sm font-medium text-[#2d5a3a]">Visit date</label>
               <input
                 type="date"
                 value={form.visitDate}
                 onChange={(e) => update('visitDate', e.target.value)}
+                className={fieldClass}
               />
             </div>
           </div>
-          <label>เวลา (สำหรับเอกสาร)</label>
+
+          <label className={labelClass}>Visit time</label>
           <input
             type="text"
             value={form.visitTime}
             onChange={(e) => update('visitTime', e.target.value)}
-            placeholder="เช่น 08.00 น. เป็นต้นไป"
+            placeholder="e.g. 08:00"
+            className={fieldClass}
           />
-          <label>หมายเหตุ</label>
+
+          <label className={labelClass}>Remarks</label>
           <textarea
             value={form.remarks}
             onChange={(e) => update('remarks', e.target.value)}
-            placeholder="หมายเหตุเพิ่มเติม"
             rows={2}
+            className={fieldClass}
           />
         </section>
 
-        <div className={styles.actions}>
-          <button type="submit" className={styles.primaryBtn} disabled={saving}>
-            {saving ? 'กำลังบันทึก...' : 'บันทึกการจอง'}
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded-lg bg-[#4a7c59] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2d5a3a] disabled:opacity-60"
+          >
+            {saving ? 'Saving...' : 'Save booking'}
           </button>
           <button
             type="button"
-            className={styles.secondaryBtn}
             onClick={() => navigate('/list')}
+            className="rounded-lg border border-[#4a7c59]/25 bg-[#4a7c59]/10 px-4 py-2 text-sm font-semibold text-[#2d5a3a] hover:bg-[#4a7c59]/20"
           >
-            ดูรายการจอง
+            View bookings
           </button>
         </div>
       </form>

@@ -74,3 +74,38 @@ npm start
 - รายการจอง: ค้นหา, แก้ไข, ลบ, ดูรายละเอียด
 - รายการตามวัน: เลือกเดือน/ปี ดูว่าวันไหนมีโรงเรียนไหนมาบ้าง (เตือนเกิน 4 โรงเรียน/วัน หรือเกิน 200 คน/โรงเรียน)
 - พิมพ์เอกสาร: Template จดหมายขอเข้าร่วมโครงการ สำหรับปริ้นให้ลูกค้า
+
+## Docker Compose (App + MySQL + phpMyAdmin)
+
+This repository now includes Docker setup with 3 services:
+- `app`: Node.js backend + built frontend (served by Express) at `http://localhost:3001`
+- `mysql`: MySQL 8.4 at `localhost:3306`
+- `phpmyadmin`: phpMyAdmin at `http://localhost:8080`
+
+### Start
+
+```bash
+docker compose up -d --build
+```
+
+### Stop
+
+```bash
+docker compose down
+```
+
+### Stop and remove MySQL data volume
+
+```bash
+docker compose down -v
+```
+
+### Default credentials
+
+- MySQL root user: `root`
+- MySQL root password: `root_password`
+- App database: `zoo_booking`
+- App user: `zoo_user`
+- App password: `zoo_password`
+
+Note: current backend code in this commit stores booking data in JSON (`backend/bookings.json`). MySQL and phpMyAdmin are provisioned and ready, but backend MySQL integration is not wired yet.
