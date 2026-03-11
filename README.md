@@ -35,6 +35,7 @@ cp .env.production.example .env
 - `MYSQL_PASSWORD`
 - (ถ้าต้องแชร์ลิงก์) `VITE_PUBLIC_BASE_URL`
 - (ถ้า API ต้องรับข้ามโดเมน) `CORS_ORIGIN`
+- (ถ้าต้องการ demo data บน server/staging) `SEED_MOCK_DATA=true`
 
 3) Build/Run
 
@@ -51,6 +52,7 @@ docker compose logs -f app mysql
 ## Notes
 
 - MySQL ไม่เปิดพอร์ตออกภายนอกในค่าเริ่มต้น (ปลอดภัยกว่า)
+- ถ้าเปิด `SEED_MOCK_DATA=true` ระบบจะใส่ mock booking/quiz/evaluation ชุดเล็กให้อัตโนมัติครั้งเดียว
 - phpMyAdmin ถูกตั้งเป็น profile `admin` (ไม่รันโดย default)
   - เปิดใช้เมื่อจำเป็นเท่านั้น:
 

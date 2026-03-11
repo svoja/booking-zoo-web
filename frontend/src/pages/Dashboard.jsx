@@ -15,6 +15,15 @@ const SERVICE_LABELS = [
   { key: 'serviceDino', label: 'Dino Island' },
 ];
 
+const STUDENT_PRICE = 50;
+const TEACHER_PRICE = 100;
+const ADDON_PRICE_MAP = {
+  serviceAQ: { student: 80, teacher: 120 },
+  serviceSnow: { student: 130, teacher: 230 },
+  serviceDino: { student: 50, teacher: 70 },
+  serviceWaterPark: { student: 10, teacher: 25 },
+};
+
 function safeDate(dateStr) {
   if (!dateStr) return null;
   const date = new Date(`${dateStr}T00:00:00`);
@@ -50,6 +59,19 @@ function getLastMonths(count) {
   return months;
 }
 
+function calculateBookingRevenue(booking) {
+  const students = Number(booking.studentsCount) || 0;
+  const teachers = Number(booking.teachersCount) || 0;
+  let total = (students * STUDENT_PRICE) + (teachers * TEACHER_PRICE);
+
+  Object.entries(ADDON_PRICE_MAP).forEach(([key, price]) => {
+    if (!booking[key]) return;
+    total += (students * price.student) + (teachers * price.teacher);
+  });
+
+  return total;
+}
+
 const panelClass = 'rounded-xl border border-[#d4e0d4] bg-white p-4 shadow-[0_2px_12px_rgba(74,124,89,0.08)]';
 
 export default function Dashboard() {
@@ -70,6 +92,12 @@ export default function Dashboard() {
     const serviceCounts = Object.fromEntries(SERVICE_LABELS.map((s) => [s.key, 0]));
     const schoolCounts = {};
     const visitsByDate = {};
+    const weekdayCounts = { 'อา.': 0, 'จ.': 0, 'อ.': 0, 'พ.': 0, 'พฤ.': 0, 'ศ.': 0, 'ส.': 0 };
+    const receiverCounts = {};
+    const gradeCounts = {};
+    let totalRevenue = 0;
+    let totalLeadDays = 0;
+    let leadDaysCount = 0;
 
     let totalStudents = 0;
     let totalTeachers = 0;
@@ -87,8 +115,31 @@ export default function Dashboard() {
       const school = (b.schoolName || '').trim() || 'ไม่ระบุโรงเรียน';
       schoolCounts[school] = (schoolCounts[school] || 0) + 1;
 
+      const receiver = (b.receiverName || '').trim();
+      if (receiver) receiverCounts[receiver] = (receiverCounts[receiver] || 0) + 1;
+
+      const grade = (b.gradeLevel || '').trim();
+      if (grade) gradeCounts[grade] = (gradeCounts[grade] || 0) + 1;
+
       if (b.visitDate) {
         visitsByDate[b.visitDate] = (visitsByDate[b.visitDate] || 0) + 1;
+        const visitDate = safeDate(b.visitDate);
+        if (visitDate) {
+          const weekdayLabel = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'][visitDate.getDay()];
+          weekdayCounts[weekdayLabel] += 1;
+        }
+      }
+
+      totalRevenue += calculateBookingRevenue(b);
+
+      const receivedDate = safeDate(b.bookingReceivedAt) || safeDate((b.createdAt || '').slice(0, 10));
+      const visitDate = safeDate(b.visitDate);
+      if (receivedDate && visitDate) {
+        const diffDays = Math.round((visitDate.getTime() - receivedDate.getTime()) / (1000 * 60 * 60 * 24));
+        if (diffDays >= 0) {
+          totalLeadDays += diffDays;
+          leadDaysCount += 1;
+        }
       }
     });
 
@@ -135,6 +186,13 @@ export default function Dashboard() {
     });
 
     const maxTrend = Math.max(...monthTrend.map((m) => m.count), 1);
+    const busiestWeekday = Object.entries(weekdayCounts).sort((a, b) => b[1] - a[1])[0] || null;
+    const topReceivers = Object.entries(receiverCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+    const topGrades = Object.entries(gradeCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
 
     return {
       totalBookings,
@@ -149,6 +207,11 @@ export default function Dashboard() {
       upcomingVisits,
       monthTrend,
       maxTrend,
+      totalRevenue,
+      avgLeadDays: leadDaysCount ? Math.round(totalLeadDays / leadDaysCount) : 0,
+      busiestWeekday,
+      topReceivers,
+      topGrades,
     };
   }, [bookings]);
 
@@ -192,6 +255,28 @@ export default function Dashboard() {
         </article>
       </section>
 
+      <section className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <article className={panelClass}>
+          <p className="mb-1 text-sm text-slate-600">รายได้ประเมินรวม</p>
+          <p className="text-3xl font-bold leading-tight text-[#2d5a3a]">
+            {new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', maximumFractionDigits: 0 }).format(metrics.totalRevenue)}
+          </p>
+        </article>
+        <article className={panelClass}>
+          <p className="mb-1 text-sm text-slate-600">ระยะเวลาจองล่วงหน้าเฉลี่ย</p>
+          <p className="text-3xl font-bold leading-tight text-[#2d5a3a]">{metrics.avgLeadDays} วัน</p>
+        </article>
+        <article className={panelClass}>
+          <p className="mb-1 text-sm text-slate-600">วันที่มีเข้าชมมากสุด</p>
+          <p className="text-3xl font-bold leading-tight text-[#2d5a3a]">
+            {metrics.busiestWeekday ? metrics.busiestWeekday[0] : '-'}
+          </p>
+          <p className="mt-1 text-sm text-slate-500">
+            {metrics.busiestWeekday ? `${metrics.busiestWeekday[1]} รายการ` : 'ยังไม่มีข้อมูล'}
+          </p>
+        </article>
+      </section>
+
       <section className="mb-4 grid gap-3 lg:grid-cols-2">
         <article className={panelClass}>
           <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">สถานะการจอง</h2>
@@ -215,6 +300,40 @@ export default function Dashboard() {
               </li>
             ))}
           </ul>
+        </article>
+      </section>
+
+      <section className="mb-4 grid gap-3 lg:grid-cols-2">
+        <article className={panelClass}>
+          <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">ระดับชั้นที่พบมากสุด</h2>
+          {metrics.topGrades.length === 0 ? (
+            <p className="m-0 text-slate-500">ยังไม่มีข้อมูลระดับชั้น</p>
+          ) : (
+            <ul className="divide-y divide-[#d4e0d4]">
+              {metrics.topGrades.map(([grade, count]) => (
+                <li key={grade} className="flex items-baseline justify-between py-2">
+                  <span>{grade}</span>
+                  <strong className="text-[#2d5a3a]">{count}</strong>
+                </li>
+              ))}
+            </ul>
+          )}
+        </article>
+
+        <article className={panelClass}>
+          <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">เจ้าหน้าที่รับจองมากสุด</h2>
+          {metrics.topReceivers.length === 0 ? (
+            <p className="m-0 text-slate-500">ยังไม่มีข้อมูลผู้รับจอง</p>
+          ) : (
+            <ul className="divide-y divide-[#d4e0d4]">
+              {metrics.topReceivers.map(([receiver, count]) => (
+                <li key={receiver} className="flex items-baseline justify-between py-2">
+                  <span>{receiver}</span>
+                  <strong className="text-[#2d5a3a]">{count}</strong>
+                </li>
+              ))}
+            </ul>
+          )}
         </article>
       </section>
 

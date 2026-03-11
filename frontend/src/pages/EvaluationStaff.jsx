@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   createEvaluationForm,
+  getEvaluationForm,
   getEvaluationFormSubmissions,
   getEvaluationForms,
   getBookings,
@@ -10,6 +11,10 @@ import {
 const cardClass = 'rounded-xl border border-[#d4e0d4] bg-white p-4 shadow-[0_2px_12px_rgba(74,124,89,0.08)]';
 const fieldClass = 'mt-1 w-full rounded-lg border border-[#d4e0d4] px-3 py-2 text-sm outline-none transition focus:border-[#4a7c59] focus:ring-2 focus:ring-[#4a7c59]/20';
 const labelClass = 'mt-3 block text-sm font-medium text-[#2d5a3a]';
+
+function qrImageUrl(text) {
+  return `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(text)}`;
+}
 
 function newQuestion() {
   return { prompt: '', type: 'rating', required: true };
@@ -28,11 +33,13 @@ export default function EvaluationStaff() {
   const [bookingQuery, setBookingQuery] = useState('');
   const [selectedBookingId, setSelectedBookingId] = useState('');
   const [forms, setForms] = useState([]);
+  const [editingFormId, setEditingFormId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [selectedData, setSelectedData] = useState(null);
   const [selectedLoading, setSelectedLoading] = useState(false);
+  const [qrPreview, setQrPreview] = useState(null);
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -42,6 +49,19 @@ export default function EvaluationStaff() {
   });
 
   const baseOrigin = useMemo(() => window.location.origin, []);
+  const shareOrigin = useMemo(() => {
+    const configured = import.meta.env.VITE_PUBLIC_BASE_URL;
+    if (configured && String(configured).trim()) return String(configured).trim().replace(/\/+$/, '');
+    return baseOrigin;
+  }, [baseOrigin]);
+
+  const isLocalhostShare = useMemo(() => {
+    try {
+      return ['localhost', '127.0.0.1'].includes(new URL(shareOrigin).hostname);
+    } catch {
+      return false;
+    }
+  }, [shareOrigin]);
 
   const loadForms = async () => {
     const rows = await getEvaluationForms();
@@ -51,6 +71,17 @@ export default function EvaluationStaff() {
   const loadBookings = async (q = '') => {
     const rows = await getBookings(q);
     setBookings(Array.isArray(rows) ? rows : []);
+  };
+
+  const resetForm = () => {
+    setEditingFormId(null);
+    setForm({
+      title: '',
+      description: '',
+      createdBy: '',
+      isActive: true,
+      questions: [newQuestion()],
+    });
   };
 
   useEffect(() => {
@@ -81,19 +112,45 @@ export default function EvaluationStaff() {
     setError('');
     setSaving(true);
     try {
-      await createEvaluationForm(form);
-      setForm({
-        title: '',
-        description: '',
-        createdBy: '',
-        isActive: true,
-        questions: [newQuestion()],
-      });
+      if (editingFormId) {
+        await updateEvaluationForm(editingFormId, form);
+      } else {
+        await createEvaluationForm(form);
+      }
+      resetForm();
       await loadForms();
     } catch (err) {
-      setError(err.message || 'สร้างแบบประเมินไม่สำเร็จ');
+      setError(err.message || (editingFormId ? 'แก้ไขแบบประเมินไม่สำเร็จ' : 'สร้างแบบประเมินไม่สำเร็จ'));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleEdit = async (formId) => {
+    setError('');
+    try {
+      const data = await getEvaluationForm(formId);
+      if (!data) {
+        setError('ไม่พบแบบประเมินที่ต้องการแก้ไข');
+        return;
+      }
+      setEditingFormId(data.id);
+      setForm({
+        title: data.title || '',
+        description: data.description || '',
+        createdBy: data.createdBy || '',
+        isActive: data.isActive !== false,
+        questions: (data.questions || []).length > 0
+          ? data.questions.map((question) => ({
+            prompt: question.prompt || '',
+            type: question.type || 'rating',
+            required: question.required !== false,
+          }))
+          : [newQuestion()],
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      setError(err.message || 'โหลดแบบประเมินเพื่อแก้ไขไม่สำเร็จ');
     }
   };
 
@@ -130,8 +187,16 @@ export default function EvaluationStaff() {
   };
 
   const selectedEvaluationLink = selectedBookingId
-    ? `${baseOrigin}/evaluation/booking/${selectedBookingId}`
+    ? `${shareOrigin}/evaluation/booking/${selectedBookingId}`
     : '';
+
+  const openQrPreview = (url, title) => {
+    setQrPreview({ url, title });
+  };
+
+  const closeQrPreview = () => {
+    setQrPreview(null);
+  };
 
   return (
     <div className="pb-8">
@@ -141,7 +206,20 @@ export default function EvaluationStaff() {
       {error ? <div className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</div> : null}
 
       <section className={`${cardClass} mb-4`}>
-        <h2 className="text-base font-semibold text-[#2d5a3a]">สร้างแบบประเมินใหม่</h2>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-base font-semibold text-[#2d5a3a]">
+            {editingFormId ? `แก้ไขแบบประเมิน #${editingFormId}` : 'สร้างแบบประเมินใหม่'}
+          </h2>
+          {editingFormId ? (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="rounded-lg border border-[#4a7c59]/25 bg-white px-3 py-1.5 text-xs font-semibold text-[#2d5a3a] hover:bg-[#e8f3e8]"
+            >
+              ยกเลิกการแก้ไข
+            </button>
+          ) : null}
+        </div>
         <form onSubmit={handleCreate}>
           <label className={labelClass}>ชื่อแบบประเมิน *</label>
           <input
@@ -228,14 +306,19 @@ export default function EvaluationStaff() {
               disabled={saving}
               className="rounded-lg bg-[#4a7c59] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2d5a3a] disabled:opacity-60"
             >
-              {saving ? 'กำลังบันทึก...' : 'บันทึกแบบประเมิน'}
+              {saving ? 'กำลังบันทึก...' : (editingFormId ? 'บันทึกการแก้ไข' : 'บันทึกแบบประเมิน')}
             </button>
           </div>
         </form>
       </section>
 
       <section className={`${cardClass} mb-4`}>
-        <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">สร้างลิงก์แบบประเมิน (ไม่ต้องแทนค่า bookingId เอง)</h2>
+        <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">สร้างลิงก์แบบประเมิน</h2>
+        {isLocalhostShare ? (
+          <p className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            ลิงก์ตอนนี้เป็น localhost ใช้ได้เฉพาะเครื่องนี้ ถ้าจะแชร์ให้คนอื่น ให้ตั้งค่า `VITE_PUBLIC_BASE_URL` เป็นโดเมนหรือ IP ที่เข้าถึงได้จริง
+          </p>
+        ) : null}
         <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
           <input
             value={bookingQuery}
@@ -266,22 +349,51 @@ export default function EvaluationStaff() {
         {selectedEvaluationLink ? (
           <div className="mt-2 rounded-lg border border-[#d4e0d4] bg-[#f7fbf6] p-3">
             <p className="m-0 break-all text-xs text-slate-600">{selectedEvaluationLink}</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => copyLink(selectedEvaluationLink)}
-                className="rounded-lg border border-[#4a7c59]/25 bg-white px-3 py-1.5 text-xs font-semibold text-[#2d5a3a] hover:bg-[#e8f3e8]"
-              >
-                คัดลอกลิงก์
-              </button>
-              <a
-                href={selectedEvaluationLink}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-lg bg-[#4a7c59] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#2d5a3a]"
-              >
-                เปิดฟอร์ม
-              </a>
+            <div className="mt-3 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => copyLink(selectedEvaluationLink)}
+                    className="rounded-lg border border-[#4a7c59]/25 bg-white px-3 py-1.5 text-xs font-semibold text-[#2d5a3a] hover:bg-[#e8f3e8]"
+                  >
+                    คัดลอกลิงก์
+                  </button>
+                  <a
+                    href={selectedEvaluationLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-lg bg-[#4a7c59] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#2d5a3a]"
+                  >
+                    เปิดฟอร์ม
+                  </a>
+                </div>
+                <p className="mt-3 text-xs text-slate-500">
+                  ใช้ QR นี้ให้โรงเรียนหรือผู้ประเมินสแกนจากมือถือ เพื่อเปิดแบบประเมินรายการนี้ได้ทันที
+                </p>
+              </div>
+
+              <div className="w-[116px] shrink-0 rounded-lg border border-[#d4e0d4] bg-white p-2 text-center">
+                <button
+                  type="button"
+                  onClick={() => openQrPreview(selectedEvaluationLink, `แบบประเมินรายการ #${selectedBookingId}`)}
+                  className="block w-full rounded"
+                >
+                  <img
+                    src={qrImageUrl(selectedEvaluationLink)}
+                    alt={`QR แบบประเมินรายการ ${selectedBookingId}`}
+                    className="mx-auto h-[90px] w-[90px] rounded"
+                  />
+                </button>
+                <p className="m-0 mt-1 text-[11px] text-slate-500">QR แบบประเมิน</p>
+                <button
+                  type="button"
+                  onClick={() => openQrPreview(selectedEvaluationLink, `แบบประเมินรายการ #${selectedBookingId}`)}
+                  className="mt-1 rounded border border-[#4a7c59]/25 bg-white px-2 py-1 text-[11px] font-semibold text-[#2d5a3a] hover:bg-[#e8f3e8]"
+                >
+                  QR เต็มจอ
+                </button>
+              </div>
             </div>
           </div>
         ) : null}
@@ -305,6 +417,13 @@ export default function EvaluationStaff() {
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleEdit(evaluationForm.id)}
+                      className="rounded-lg border border-[#4a7c59]/25 bg-white px-3 py-1.5 text-xs font-semibold text-[#2d5a3a] hover:bg-[#e8f3e8]"
+                    >
+                      แก้ไขแบบประเมิน
+                    </button>
                     <button
                       type="button"
                       onClick={() => toggleActive(evaluationForm)}
@@ -376,6 +495,37 @@ export default function EvaluationStaff() {
           </>
         ) : null}
       </section>
+
+      {qrPreview ? (
+        <div className="fixed inset-0 z-[100] bg-black/80 p-4">
+          <div className="mx-auto flex h-full max-w-3xl flex-col items-center justify-center gap-3">
+            <p className="m-0 text-center text-sm font-semibold text-white">{qrPreview.title}</p>
+            <div className="rounded-2xl bg-white p-4 shadow-2xl">
+              <img
+                src={qrImageUrl(qrPreview.url)}
+                alt={qrPreview.title}
+                className="h-[80vw] w-[80vw] max-h-[520px] max-w-[520px] rounded-lg"
+              />
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <button
+                type="button"
+                onClick={() => copyLink(qrPreview.url)}
+                className="rounded-lg border border-white/50 bg-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/20"
+              >
+                คัดลอกลิงก์
+              </button>
+              <button
+                type="button"
+                onClick={closeQrPreview}
+                className="rounded-lg bg-white px-3 py-2 text-sm font-semibold text-[#2d5a3a] hover:bg-slate-100"
+              >
+                ปิด
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

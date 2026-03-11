@@ -40,6 +40,7 @@ import {
   getBookingEvaluationByBookingId,
   initializeEvaluationDb,
 } from './evaluationDb.js';
+import { seedMockDataIfEnabled } from './mockSeed.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isProduction = process.env.NODE_ENV === 'production';
@@ -364,7 +365,8 @@ if (isProduction) {
 }
 
 Promise.all([initializeBookingDb(), initializeQuizDb(), initializeEvaluationDb()])
-  .then(() => {
+  .then(async () => {
+    await seedMockDataIfEnabled();
     app.listen(PORT, () => {
       console.log(isProduction
         ? `Zoo booking running at http://localhost:${PORT}`

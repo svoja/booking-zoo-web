@@ -16,6 +16,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-zoo_booking}
       MYSQL_USER: ${MYSQL_USER:-zoo_user}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env}
+      SEED_MOCK_DATA: ${SEED_MOCK_DATA:-false}
     ports:
       - "3001:3001"
     depends_on:
