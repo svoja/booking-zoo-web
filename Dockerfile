@@ -1,5 +1,7 @@
 FROM node:20-alpine AS frontend-build
 WORKDIR /app/frontend
+ARG VITE_PUBLIC_BASE_URL=
+ENV VITE_PUBLIC_BASE_URL=${VITE_PUBLIC_BASE_URL}
 
 COPY frontend/package*.json ./
 RUN npm ci

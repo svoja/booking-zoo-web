@@ -46,8 +46,13 @@ const isProduction = process.env.NODE_ENV === 'production';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+const configuredCorsOrigins = String(process.env.CORS_ORIGIN || '')
+  .split(',')
+  .map((v) => v.trim())
+  .filter(Boolean);
+
 const corsOrigins = isProduction
-  ? true
+  ? (configuredCorsOrigins.length > 0 ? configuredCorsOrigins : false)
   : ['http://localhost:5173', 'http://127.0.0.1:5173'];
 app.use(cors({ origin: corsOrigins }));
 app.use(express.json());

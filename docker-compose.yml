@@ -3,16 +3,19 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        VITE_PUBLIC_BASE_URL: ${VITE_PUBLIC_BASE_URL:-}
     container_name: zoo-booking-app
     restart: unless-stopped
     environment:
       NODE_ENV: production
       PORT: 3001
+      CORS_ORIGIN: ${CORS_ORIGIN:-}
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
-      MYSQL_DATABASE: zoo_booking
-      MYSQL_USER: zoo_user
-      MYSQL_PASSWORD: zoo_password
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-zoo_booking}
+      MYSQL_USER: ${MYSQL_USER:-zoo_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env}
     ports:
       - "3001:3001"
     depends_on:
@@ -24,22 +27,23 @@ services:
     container_name: zoo-booking-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_DATABASE: zoo_booking
-      MYSQL_USER: zoo_user
-      MYSQL_PASSWORD: zoo_password
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-zoo_booking}
+      MYSQL_USER: ${MYSQL_USER:-zoo_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?set MYSQL_PASSWORD in .env}
       TZ: Asia/Bangkok
-    ports:
-      - "3307:3306"
+    expose:
+      - "3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot_password"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}"]
       interval: 10s
       timeout: 5s
       retries: 10
 
   phpmyadmin:
+    profiles: ["admin"]
     image: phpmyadmin:5.2-apache
     container_name: zoo-booking-phpmyadmin
     restart: unless-stopped
@@ -47,7 +51,7 @@ services:
       PMA_HOST: mysql
       PMA_PORT: 3306
       PMA_USER: root
-      PMA_PASSWORD: root_password
+      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}
       UPLOAD_LIMIT: 64M
     ports:
       - "8080:80"
