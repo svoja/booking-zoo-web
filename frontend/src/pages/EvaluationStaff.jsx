@@ -28,6 +28,15 @@ function scoreLabel(score) {
   return 'ต้องปรับปรุงมาก';
 }
 
+function SectionTitle({ icon, children }) {
+  return (
+    <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-[#2d5a3a]">
+      <span className="material-symbols-outlined app-icon text-[#4a7c59]" aria-hidden>{icon}</span>
+      <span>{children}</span>
+    </h2>
+  );
+}
+
 export default function EvaluationStaff() {
   const [bookings, setBookings] = useState([]);
   const [bookingQuery, setBookingQuery] = useState('');
@@ -207,15 +216,17 @@ export default function EvaluationStaff() {
 
       <section className={`${cardClass} mb-4`}>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h2 className="text-base font-semibold text-[#2d5a3a]">
-            {editingFormId ? `แก้ไขแบบประเมิน #${editingFormId}` : 'สร้างแบบประเมินใหม่'}
+          <h2 className="flex items-center gap-2 text-base font-semibold text-[#2d5a3a]">
+            <span className="material-symbols-outlined app-icon text-[#4a7c59]" aria-hidden>{editingFormId ? 'edit_square' : 'post_add'}</span>
+            <span>{editingFormId ? `แก้ไขแบบประเมิน #${editingFormId}` : 'สร้างแบบประเมินใหม่'}</span>
           </h2>
           {editingFormId ? (
             <button
               type="button"
               onClick={resetForm}
-              className="rounded-lg border border-[#4a7c59]/25 bg-white px-3 py-1.5 text-xs font-semibold text-[#2d5a3a] hover:bg-[#e8f3e8]"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#4a7c59]/25 bg-white px-3 py-1.5 text-xs font-semibold text-[#2d5a3a] hover:bg-[#e8f3e8]"
             >
+              <span className="material-symbols-outlined app-icon" aria-hidden>close</span>
               ยกเลิกการแก้ไข
             </button>
           ) : null}
@@ -297,15 +308,17 @@ export default function EvaluationStaff() {
             <button
               type="button"
               onClick={addQuestion}
-              className="rounded-lg border border-[#4a7c59]/25 bg-[#4a7c59]/10 px-3 py-2 text-sm font-semibold text-[#2d5a3a] hover:bg-[#4a7c59]/20"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#4a7c59]/25 bg-[#4a7c59]/10 px-3 py-2 text-sm font-semibold text-[#2d5a3a] hover:bg-[#4a7c59]/20"
             >
-              + เพิ่มคำถาม
+              <span className="material-symbols-outlined app-icon" aria-hidden>add_circle</span>
+              เพิ่มคำถาม
             </button>
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-[#4a7c59] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2d5a3a] disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#4a7c59] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2d5a3a] disabled:opacity-60"
             >
+              <span className="material-symbols-outlined app-icon" aria-hidden>{saving ? 'progress_activity' : 'save'}</span>
               {saving ? 'กำลังบันทึก...' : (editingFormId ? 'บันทึกการแก้ไข' : 'บันทึกแบบประเมิน')}
             </button>
           </div>
@@ -313,7 +326,7 @@ export default function EvaluationStaff() {
       </section>
 
       <section className={`${cardClass} mb-4`}>
-        <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">สร้างลิงก์แบบประเมิน</h2>
+        <SectionTitle icon="qr_code_2">สร้างลิงก์แบบประเมิน</SectionTitle>
         {isLocalhostShare ? (
           <p className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
             ลิงก์ตอนนี้เป็น localhost ใช้ได้เฉพาะเครื่องนี้ ถ้าจะแชร์ให้คนอื่น ให้ตั้งค่า `VITE_PUBLIC_BASE_URL` เป็นโดเมนหรือ IP ที่เข้าถึงได้จริง
@@ -329,8 +342,9 @@ export default function EvaluationStaff() {
           <button
             type="button"
             onClick={() => loadBookings(bookingQuery).catch((err) => setError(err.message || 'ค้นหารายการจองไม่สำเร็จ'))}
-            className="rounded-lg border border-[#4a7c59]/25 bg-white px-3 py-2 text-sm font-semibold text-[#2d5a3a] hover:bg-[#e8f3e8]"
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-[#4a7c59]/25 bg-white px-3 py-2 text-sm font-semibold text-[#2d5a3a] hover:bg-[#e8f3e8]"
           >
+            <span className="material-symbols-outlined app-icon" aria-hidden>search</span>
             ค้นหา
           </button>
         </div>
@@ -355,16 +369,18 @@ export default function EvaluationStaff() {
                   <button
                     type="button"
                     onClick={() => copyLink(selectedEvaluationLink)}
-                    className="rounded-lg border border-[#4a7c59]/25 bg-white px-3 py-1.5 text-xs font-semibold text-[#2d5a3a] hover:bg-[#e8f3e8]"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-[#4a7c59]/25 bg-white px-3 py-1.5 text-xs font-semibold text-[#2d5a3a] hover:bg-[#e8f3e8]"
                   >
+                    <span className="material-symbols-outlined app-icon" aria-hidden>content_copy</span>
                     คัดลอกลิงก์
                   </button>
                   <a
                     href={selectedEvaluationLink}
                     target="_blank"
                     rel="noreferrer"
-                    className="rounded-lg bg-[#4a7c59] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#2d5a3a]"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-[#4a7c59] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#2d5a3a]"
                   >
+                    <span className="material-symbols-outlined app-icon" aria-hidden>open_in_new</span>
                     เปิดฟอร์ม
                   </a>
                 </div>
@@ -389,8 +405,9 @@ export default function EvaluationStaff() {
                 <button
                   type="button"
                   onClick={() => openQrPreview(selectedEvaluationLink, `แบบประเมินรายการ #${selectedBookingId}`)}
-                  className="mt-1 rounded border border-[#4a7c59]/25 bg-white px-2 py-1 text-[11px] font-semibold text-[#2d5a3a] hover:bg-[#e8f3e8]"
+                  className="mt-1 inline-flex items-center gap-1 rounded border border-[#4a7c59]/25 bg-white px-2 py-1 text-[11px] font-semibold text-[#2d5a3a] hover:bg-[#e8f3e8]"
                 >
+                  <span className="material-symbols-outlined app-icon" aria-hidden>fullscreen</span>
                   QR เต็มจอ
                 </button>
               </div>
@@ -400,7 +417,7 @@ export default function EvaluationStaff() {
       </section>
 
       <section className={`${cardClass} mb-4`}>
-        <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">รายการแบบประเมิน</h2>
+        <SectionTitle icon="list_alt">รายการแบบประเมิน</SectionTitle>
         {loading ? <p className="text-slate-500">กำลังโหลด...</p> : null}
         {!loading && forms.length === 0 ? <p className="text-slate-500">ยังไม่มีแบบประเมิน</p> : null}
 
@@ -420,22 +437,25 @@ export default function EvaluationStaff() {
                     <button
                       type="button"
                       onClick={() => handleEdit(evaluationForm.id)}
-                      className="rounded-lg border border-[#4a7c59]/25 bg-white px-3 py-1.5 text-xs font-semibold text-[#2d5a3a] hover:bg-[#e8f3e8]"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#4a7c59]/25 bg-white px-3 py-1.5 text-xs font-semibold text-[#2d5a3a] hover:bg-[#e8f3e8]"
                     >
+                      <span className="material-symbols-outlined app-icon" aria-hidden>edit</span>
                       แก้ไขแบบประเมิน
                     </button>
                     <button
                       type="button"
                       onClick={() => toggleActive(evaluationForm)}
-                      className="rounded-lg border border-[#4a7c59]/25 bg-white px-3 py-1.5 text-xs font-semibold text-[#2d5a3a] hover:bg-[#e8f3e8]"
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-[#4a7c59]/25 bg-white px-3 py-1.5 text-xs font-semibold text-[#2d5a3a] hover:bg-[#e8f3e8]"
                     >
+                      <span className="material-symbols-outlined app-icon" aria-hidden>{evaluationForm.isActive ? 'toggle_off' : 'toggle_on'}</span>
                       {evaluationForm.isActive ? 'ปิดรับแบบฟอร์มนี้' : 'เปิดใช้งานแบบฟอร์มนี้'}
                     </button>
                     <button
                       type="button"
                       onClick={() => openSubmissions(evaluationForm.id)}
-                      className="rounded-lg bg-[#4a7c59] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#2d5a3a]"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#4a7c59] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#2d5a3a]"
                     >
+                      <span className="material-symbols-outlined app-icon" aria-hidden>visibility</span>
                       ดูคำตอบ
                     </button>
                   </div>
@@ -447,7 +467,7 @@ export default function EvaluationStaff() {
       </section>
 
       <section className={cardClass}>
-        <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">คำตอบที่เลือกดู</h2>
+        <SectionTitle icon="forum">คำตอบที่เลือกดู</SectionTitle>
         {selectedLoading ? <p className="text-slate-500">กำลังโหลดคำตอบ...</p> : null}
         {!selectedLoading && !selectedData ? <p className="text-slate-500">กด “ดูคำตอบ” จากรายการด้านบน</p> : null}
 
@@ -511,15 +531,17 @@ export default function EvaluationStaff() {
               <button
                 type="button"
                 onClick={() => copyLink(qrPreview.url)}
-                className="rounded-lg border border-white/50 bg-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/20"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/50 bg-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/20"
               >
+                <span className="material-symbols-outlined app-icon" aria-hidden>content_copy</span>
                 คัดลอกลิงก์
               </button>
               <button
                 type="button"
                 onClick={closeQrPreview}
-                className="rounded-lg bg-white px-3 py-2 text-sm font-semibold text-[#2d5a3a] hover:bg-slate-100"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-[#2d5a3a] hover:bg-slate-100"
               >
+                <span className="material-symbols-outlined app-icon" aria-hidden>close</span>
                 ปิด
               </button>
             </div>

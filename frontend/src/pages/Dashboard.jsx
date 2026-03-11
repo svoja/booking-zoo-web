@@ -74,6 +74,28 @@ function calculateBookingRevenue(booking) {
 
 const panelClass = 'rounded-xl border border-[#d4e0d4] bg-white p-4 shadow-[0_2px_12px_rgba(74,124,89,0.08)]';
 
+function MetricCard({ icon, label, value, subtext }) {
+  return (
+    <article className={panelClass}>
+      <div className="mb-2 flex items-center gap-2 text-sm text-slate-600">
+        <span className="material-symbols-outlined app-icon text-[#4a7c59]" aria-hidden>{icon}</span>
+        <p>{label}</p>
+      </div>
+      <p className="text-3xl font-bold leading-tight text-[#2d5a3a]">{value}</p>
+      {subtext ? <p className="mt-1 text-sm text-slate-500">{subtext}</p> : null}
+    </article>
+  );
+}
+
+function SectionTitle({ icon, children }) {
+  return (
+    <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-[#2d5a3a]">
+      <span className="material-symbols-outlined app-icon text-[#4a7c59]" aria-hidden>{icon}</span>
+      <span>{children}</span>
+    </h2>
+  );
+}
+
 export default function Dashboard() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -237,49 +259,30 @@ export default function Dashboard() {
       <p className="mb-5 text-slate-600">ภาพรวมจำนวนการจอง ความต้องการ และกำหนดการเข้าชมที่กำลังจะมาถึง</p>
 
       <section className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <article className={panelClass}>
-          <p className="mb-1 text-sm text-slate-600">การจองทั้งหมด</p>
-          <p className="text-3xl font-bold leading-tight text-[#2d5a3a]">{metrics.totalBookings}</p>
-        </article>
-        <article className={panelClass}>
-          <p className="mb-1 text-sm text-slate-600">นักเรียนทั้งหมด</p>
-          <p className="text-3xl font-bold leading-tight text-[#2d5a3a]">{metrics.totalStudents}</p>
-        </article>
-        <article className={panelClass}>
-          <p className="mb-1 text-sm text-slate-600">ครูทั้งหมด</p>
-          <p className="text-3xl font-bold leading-tight text-[#2d5a3a]">{metrics.totalTeachers}</p>
-        </article>
-        <article className={panelClass}>
-          <p className="mb-1 text-sm text-slate-600">เฉลี่ยคนต่อการจอง</p>
-          <p className="text-3xl font-bold leading-tight text-[#2d5a3a]">{metrics.avgPeoplePerBooking}</p>
-        </article>
+        <MetricCard icon="inventory_2" label="การจองทั้งหมด" value={metrics.totalBookings} />
+        <MetricCard icon="school" label="นักเรียนทั้งหมด" value={metrics.totalStudents} />
+        <MetricCard icon="supervisor_account" label="ครูทั้งหมด" value={metrics.totalTeachers} />
+        <MetricCard icon="groups" label="เฉลี่ยคนต่อการจอง" value={metrics.avgPeoplePerBooking} />
       </section>
 
       <section className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        <article className={panelClass}>
-          <p className="mb-1 text-sm text-slate-600">รายได้ประเมินรวม</p>
-          <p className="text-3xl font-bold leading-tight text-[#2d5a3a]">
-            {new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', maximumFractionDigits: 0 }).format(metrics.totalRevenue)}
-          </p>
-        </article>
-        <article className={panelClass}>
-          <p className="mb-1 text-sm text-slate-600">ระยะเวลาจองล่วงหน้าเฉลี่ย</p>
-          <p className="text-3xl font-bold leading-tight text-[#2d5a3a]">{metrics.avgLeadDays} วัน</p>
-        </article>
-        <article className={panelClass}>
-          <p className="mb-1 text-sm text-slate-600">วันที่มีเข้าชมมากสุด</p>
-          <p className="text-3xl font-bold leading-tight text-[#2d5a3a]">
-            {metrics.busiestWeekday ? metrics.busiestWeekday[0] : '-'}
-          </p>
-          <p className="mt-1 text-sm text-slate-500">
-            {metrics.busiestWeekday ? `${metrics.busiestWeekday[1]} รายการ` : 'ยังไม่มีข้อมูล'}
-          </p>
-        </article>
+        <MetricCard
+          icon="payments"
+          label="รายได้ประเมินรวม"
+          value={new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB', maximumFractionDigits: 0 }).format(metrics.totalRevenue)}
+        />
+        <MetricCard icon="schedule" label="ระยะเวลาจองล่วงหน้าเฉลี่ย" value={`${metrics.avgLeadDays} วัน`} />
+        <MetricCard
+          icon="event_busy"
+          label="วันที่มีเข้าชมมากสุด"
+          value={metrics.busiestWeekday ? metrics.busiestWeekday[0] : '-'}
+          subtext={metrics.busiestWeekday ? `${metrics.busiestWeekday[1]} รายการ` : 'ยังไม่มีข้อมูล'}
+        />
       </section>
 
       <section className="mb-4 grid gap-3 lg:grid-cols-2">
         <article className={panelClass}>
-          <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">สถานะการจอง</h2>
+          <SectionTitle icon="approval">สถานะการจอง</SectionTitle>
           <ul className="divide-y divide-[#d4e0d4]">
             {Object.entries(metrics.statusCounts).map(([key, value]) => (
               <li key={key} className="flex items-baseline justify-between py-2">
@@ -291,7 +294,7 @@ export default function Dashboard() {
         </article>
 
         <article className={panelClass}>
-          <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">ความนิยมของบริการ</h2>
+          <SectionTitle icon="local_activity">ความนิยมของบริการ</SectionTitle>
           <ul className="divide-y divide-[#d4e0d4]">
             {SERVICE_LABELS.map((service) => (
               <li key={service.key} className="flex items-baseline justify-between py-2">
@@ -305,7 +308,7 @@ export default function Dashboard() {
 
       <section className="mb-4 grid gap-3 lg:grid-cols-2">
         <article className={panelClass}>
-          <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">ระดับชั้นที่พบมากสุด</h2>
+          <SectionTitle icon="menu_book">ระดับชั้นที่พบมากสุด</SectionTitle>
           {metrics.topGrades.length === 0 ? (
             <p className="m-0 text-slate-500">ยังไม่มีข้อมูลระดับชั้น</p>
           ) : (
@@ -321,7 +324,7 @@ export default function Dashboard() {
         </article>
 
         <article className={panelClass}>
-          <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">เจ้าหน้าที่รับจองมากสุด</h2>
+          <SectionTitle icon="badge">เจ้าหน้าที่รับจองมากสุด</SectionTitle>
           {metrics.topReceivers.length === 0 ? (
             <p className="m-0 text-slate-500">ยังไม่มีข้อมูลผู้รับจอง</p>
           ) : (
@@ -338,7 +341,7 @@ export default function Dashboard() {
       </section>
 
       <section className={`${panelClass} mb-4`}>
-        <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">แนวโน้มการจอง (ย้อนหลัง 6 เดือน)</h2>
+        <SectionTitle icon="bar_chart">แนวโน้มการจอง (ย้อนหลัง 6 เดือน)</SectionTitle>
         <div className="grid h-56 grid-cols-6 items-end gap-3">
           {metrics.monthTrend.map((m) => (
             <div key={m.key} className="grid h-full grid-rows-[1fr_auto_auto] items-end gap-1.5">
@@ -356,7 +359,7 @@ export default function Dashboard() {
 
       <section className="mb-4 grid gap-3 lg:grid-cols-2">
         <article className={panelClass}>
-          <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">โรงเรียนที่จองสูงสุด</h2>
+          <SectionTitle icon="domain">โรงเรียนที่จองสูงสุด</SectionTitle>
           {metrics.topSchools.length === 0 ? (
             <p className="m-0 text-slate-500">ยังไม่มีข้อมูล</p>
           ) : (
@@ -372,7 +375,7 @@ export default function Dashboard() {
         </article>
 
         <article className={panelClass}>
-          <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">วันที่เข้าชมที่หนาแน่นที่สุด</h2>
+          <SectionTitle icon="calendar_month">วันที่เข้าชมที่หนาแน่นที่สุด</SectionTitle>
           {metrics.topVisitDates.length === 0 ? (
             <p className="m-0 text-slate-500">ยังไม่มีวันที่เข้าชม</p>
           ) : (
@@ -389,7 +392,7 @@ export default function Dashboard() {
       </section>
 
       <section className={panelClass}>
-        <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">กำหนดการเข้าชมที่กำลังจะมาถึง (7 วัน)</h2>
+        <SectionTitle icon="upcoming">กำหนดการเข้าชมที่กำลังจะมาถึง (7 วัน)</SectionTitle>
         {metrics.upcomingVisits.length === 0 ? (
           <p className="m-0 text-slate-500">ไม่มีรายการเข้าชมใน 7 วันข้างหน้า</p>
         ) : (

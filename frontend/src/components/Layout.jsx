@@ -9,7 +9,7 @@ export default function Layout() {
       <header className="layout-header no-print">
         <div className="layout-inner">
           <NavLink to="/" className="logo">
-            <span className="logo-icon" aria-hidden>🦒</span>
+            <span className="material-symbols-outlined logo-icon" aria-hidden>pets</span>
             <span>ZOOCLASS</span>
           </NavLink>
         </div>
@@ -21,7 +21,10 @@ export default function Layout() {
 
       <div className="site-qr-wrap no-print">
         <div className="site-qr">
-          <p className="site-qr-title">สแกน QR เพื่อเข้าเว็บจอง</p>
+          <p className="site-qr-title flex items-center justify-center gap-1.5">
+            <span className="material-symbols-outlined app-icon" aria-hidden>qr_code_2</span>
+            <span>สแกน QR เพื่อเข้าเว็บจอง</span>
+          </p>
           {showQr ? (
             <img
               src="/qr-web.png"

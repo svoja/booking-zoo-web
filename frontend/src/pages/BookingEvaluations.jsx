@@ -8,6 +8,27 @@ const statusLabels = {
   rejected: 'ไม่อนุมัติ',
 };
 
+function MetricCard({ icon, label, value }) {
+  return (
+    <article className="rounded-xl border border-[#d4e0d4] bg-white p-4 shadow-[0_2px_12px_rgba(74,124,89,0.08)]">
+      <div className="flex items-center gap-2 text-sm text-slate-600">
+        <span className="material-symbols-outlined app-icon text-[#4a7c59]" aria-hidden>{icon}</span>
+        <p>{label}</p>
+      </div>
+      <p className="mt-2 text-3xl font-bold text-[#2d5a3a]">{value}</p>
+    </article>
+  );
+}
+
+function SectionTitle({ icon, children }) {
+  return (
+    <h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-[#2d5a3a]">
+      <span className="material-symbols-outlined app-icon text-[#4a7c59]" aria-hidden>{icon}</span>
+      <span>{children}</span>
+    </h2>
+  );
+}
+
 function getDisplayStatus(row) {
   const rawStatus = row.booking?.status;
   if (rawStatus === 'pending' && row.submittedAt) {
@@ -118,27 +139,15 @@ export default function BookingEvaluations() {
       <h1 className="mb-4 text-3xl font-bold text-[#2d5a3a]">ผลประเมินหลังเข้าชม</h1>
 
       <section className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-xl border border-[#d4e0d4] bg-white p-4 shadow-[0_2px_12px_rgba(74,124,89,0.08)]">
-          <p className="text-sm text-slate-600">ส่งแบบประเมินแล้ว</p>
-          <p className="mt-2 text-3xl font-bold text-[#2d5a3a]">{metrics.totalSubmissions}</p>
-        </article>
-        <article className="rounded-xl border border-[#d4e0d4] bg-white p-4 shadow-[0_2px_12px_rgba(74,124,89,0.08)]">
-          <p className="text-sm text-slate-600">คะแนนเฉลี่ยรวม</p>
-          <p className="mt-2 text-3xl font-bold text-[#2d5a3a]">{metrics.averageScore.toFixed(2)} / 5</p>
-        </article>
-        <article className="rounded-xl border border-[#d4e0d4] bg-white p-4 shadow-[0_2px_12px_rgba(74,124,89,0.08)]">
-          <p className="text-sm text-slate-600">อัตราการตอบกลับ</p>
-          <p className="mt-2 text-3xl font-bold text-[#2d5a3a]">{metrics.responseRate.toFixed(1)}%</p>
-        </article>
-        <article className="rounded-xl border border-[#d4e0d4] bg-white p-4 shadow-[0_2px_12px_rgba(74,124,89,0.08)]">
-          <p className="text-sm text-slate-600">คะแนนต่ำกว่า 3</p>
-          <p className="mt-2 text-3xl font-bold text-[#2d5a3a]">{metrics.lowScoreCount}</p>
-        </article>
+        <MetricCard icon="fact_check" label="ส่งแบบประเมินแล้ว" value={metrics.totalSubmissions} />
+        <MetricCard icon="star" label="คะแนนเฉลี่ยรวม" value={`${metrics.averageScore.toFixed(2)} / 5`} />
+        <MetricCard icon="monitoring" label="อัตราการตอบกลับ" value={`${metrics.responseRate.toFixed(1)}%`} />
+        <MetricCard icon="warning" label="คะแนนต่ำกว่า 3" value={metrics.lowScoreCount} />
       </section>
 
       <section className="mb-4 grid gap-3 lg:grid-cols-3">
         <article className="rounded-xl border border-[#d4e0d4] bg-white p-4 shadow-[0_2px_12px_rgba(74,124,89,0.08)]">
-          <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">แบบประเมินที่ถูกใช้มากสุด</h2>
+          <SectionTitle icon="assignment">แบบประเมินที่ถูกใช้มากสุด</SectionTitle>
           {metrics.topForms.length === 0 ? (
             <p className="text-sm text-slate-500">ยังไม่มีข้อมูล</p>
           ) : (
@@ -154,7 +163,7 @@ export default function BookingEvaluations() {
         </article>
 
         <article className="rounded-xl border border-[#d4e0d4] bg-white p-4 shadow-[0_2px_12px_rgba(74,124,89,0.08)]">
-          <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">โรงเรียนที่ตอบแบบประเมินมากสุด</h2>
+          <SectionTitle icon="school">โรงเรียนที่ตอบแบบประเมินมากสุด</SectionTitle>
           {metrics.topSchools.length === 0 ? (
             <p className="text-sm text-slate-500">ยังไม่มีข้อมูล</p>
           ) : (
@@ -170,7 +179,7 @@ export default function BookingEvaluations() {
         </article>
 
         <article className="rounded-xl border border-[#d4e0d4] bg-white p-4 shadow-[0_2px_12px_rgba(74,124,89,0.08)]">
-          <h2 className="mb-3 text-base font-semibold text-[#2d5a3a]">ประเด็นที่ควรจับตา</h2>
+          <SectionTitle icon="visibility">ประเด็นที่ควรจับตา</SectionTitle>
           {metrics.weakestQuestions.length === 0 ? (
             <p className="text-sm text-slate-500">ยังไม่มีข้อมูลคะแนน</p>
           ) : (
@@ -201,9 +210,15 @@ export default function BookingEvaluations() {
                 <div>
                   <h2 className="text-lg font-semibold text-[#2d5a3a]">{row.booking?.schoolName || '-'}</h2>
                   <p className="text-sm text-slate-600">
+                    <span className="mr-1 inline-flex items-center align-middle">
+                      <span className="material-symbols-outlined app-icon text-slate-500" aria-hidden>calendar_month</span>
+                    </span>
                     วันเข้าชม: {row.booking?.visitDate || '-'} {row.booking?.visitTime ? `เวลา ${row.booking.visitTime}` : ''}
                   </p>
                   <p className="text-sm text-slate-600">
+                    <span className="mr-1 inline-flex items-center align-middle">
+                      <span className="material-symbols-outlined app-icon text-slate-500" aria-hidden>approval</span>
+                    </span>
                     สถานะการจอง: {statusLabels[getDisplayStatus(row)] || getDisplayStatus(row) || '-'}
                   </p>
                 </div>
@@ -231,8 +246,9 @@ export default function BookingEvaluations() {
               <div className="mt-3">
                 <Link
                   to={`/features/booking/booking/${row.bookingId}`}
-                  className="inline-block rounded-lg border border-[#4a7c59]/25 bg-white px-3 py-2 text-sm font-semibold text-[#2d5a3a] hover:bg-[#f0f7f0]"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#4a7c59]/25 bg-white px-3 py-2 text-sm font-semibold text-[#2d5a3a] hover:bg-[#f0f7f0]"
                 >
+                  <span className="material-symbols-outlined app-icon" aria-hidden>open_in_new</span>
                   ดูรายละเอียดการจอง
                 </Link>
               </div>
