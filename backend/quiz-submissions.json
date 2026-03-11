@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "quizId": 1,
+    "studentName": "นายเทพ",
+    "studentCode": "27882",
+    "classRoom": "ป.6",
+    "answers": [
+      {
+        "questionId": 1,
+        "prompt": "สัตว์อะไรทำอาหารได้",
+        "answer": "ไม่มี"
+      }
+    ],
+    "submittedAt": "2026-03-11T00:24:20.865Z"
+  }
+]

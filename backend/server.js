@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import {
+  initializeBookingDb,
   getAllBookings,
   getBookingById,
   createBooking as dbCreateBooking,
@@ -10,6 +11,35 @@ import {
   deleteBookingById,
   searchBookings,
 } from './db.js';
+import {
+  getAllQuizzes,
+  getQuizById,
+  createQuiz,
+  updateQuiz,
+  getQuizSessions,
+  createQuizSession,
+  getPublicQuiz,
+  getPublicQuizBySessionToken,
+  submitQuiz,
+  submitQuizBySessionToken,
+  getQuizSubmissions,
+  getQuizSessionSubmissions,
+  getPublicQuizResults,
+  getPublicQuizResultsBySessionToken,
+  initializeQuizDb,
+} from './quizDb.js';
+import {
+  getAllBookingEvaluations,
+  getAllEvaluationForms,
+  getEvaluationFormById,
+  createEvaluationForm,
+  updateEvaluationForm,
+  getEvaluationSubmissionsByForm,
+  getPublicBookingEvaluationForm,
+  submitBookingEvaluation,
+  getBookingEvaluationByBookingId,
+  initializeEvaluationDb,
+} from './evaluationDb.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isProduction = process.env.NODE_ENV === 'production';
@@ -47,10 +77,10 @@ function rowToBooking(row) {
   };
 }
 
-app.get('/api/bookings', (req, res) => {
+app.get('/api/bookings', async (req, res) => {
   try {
     const { q } = req.query;
-    const rows = q && String(q).trim() ? searchBookings(q) : getAllBookings();
+    const rows = q && String(q).trim() ? await searchBookings(q) : await getAllBookings();
     const ordered = [...rows].sort((a, b) => (b.id || 0) - (a.id || 0));
     res.json(ordered.map(rowToBooking));
   } catch (err) {
@@ -58,9 +88,9 @@ app.get('/api/bookings', (req, res) => {
   }
 });
 
-app.get('/api/bookings/:id', (req, res) => {
+app.get('/api/bookings/:id', async (req, res) => {
   try {
-    const row = getBookingById(req.params.id);
+    const row = await getBookingById(req.params.id);
     if (!row) return res.status(404).json({ error: 'Not found' });
     res.json(rowToBooking(row));
   } catch (err) {
@@ -68,18 +98,18 @@ app.get('/api/bookings/:id', (req, res) => {
   }
 });
 
-app.post('/api/bookings', (req, res) => {
+app.post('/api/bookings', async (req, res) => {
   try {
-    const created = dbCreateBooking(req.body);
+    const created = await dbCreateBooking(req.body);
     res.status(201).json(created);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-app.put('/api/bookings/:id', (req, res) => {
+app.put('/api/bookings/:id', async (req, res) => {
   try {
-    const updated = dbUpdateBooking(req.params.id, req.body);
+    const updated = await dbUpdateBooking(req.params.id, req.body);
     if (!updated) return res.status(404).json({ error: 'Not found' });
     res.json(updated);
   } catch (err) {
@@ -87,11 +117,234 @@ app.put('/api/bookings/:id', (req, res) => {
   }
 });
 
-app.delete('/api/bookings/:id', (req, res) => {
+app.delete('/api/bookings/:id', async (req, res) => {
   try {
-    const ok = deleteBookingById(req.params.id);
+    const ok = await deleteBookingById(req.params.id);
     if (!ok) return res.status(404).json({ error: 'Not found' });
     res.status(204).send();
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/bookings/:id/evaluation-form', async (req, res) => {
+  try {
+    const data = await getPublicBookingEvaluationForm(req.params.id);
+    if (!data) return res.status(404).json({ error: 'Booking not found' });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/bookings/:id/evaluation', async (req, res) => {
+  try {
+    const data = await getBookingEvaluationByBookingId(req.params.id);
+    if (!data) return res.status(404).json({ error: 'Evaluation not found' });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/evaluations', async (req, res) => {
+  try {
+    const rows = await getAllBookingEvaluations();
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/evaluations/forms', async (req, res) => {
+  try {
+    const rows = await getAllEvaluationForms();
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/evaluations/forms/:id', async (req, res) => {
+  try {
+    const form = await getEvaluationFormById(req.params.id);
+    if (!form) return res.status(404).json({ error: 'Evaluation form not found' });
+    res.json(form);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/evaluations/forms', async (req, res) => {
+  try {
+    const created = await createEvaluationForm(req.body || {});
+    res.status(201).json(created);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.put('/api/evaluations/forms/:id', async (req, res) => {
+  try {
+    const updated = await updateEvaluationForm(req.params.id, req.body || {});
+    if (!updated) return res.status(404).json({ error: 'Evaluation form not found' });
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.get('/api/evaluations/forms/:id/submissions', async (req, res) => {
+  try {
+    const data = await getEvaluationSubmissionsByForm(req.params.id);
+    if (!data) return res.status(404).json({ error: 'Evaluation form not found' });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/bookings/:id/evaluation', async (req, res) => {
+  try {
+    const submitted = await submitBookingEvaluation(req.params.id, req.body || {});
+    if (!submitted) return res.status(404).json({ error: 'Booking not found' });
+    res.status(201).json(submitted);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.get('/api/quizzes', async (req, res) => {
+  try {
+    res.json(await getAllQuizzes());
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/quizzes/:id', async (req, res) => {
+  try {
+    const quiz = await getQuizById(req.params.id);
+    if (!quiz) return res.status(404).json({ error: 'Quiz not found' });
+    res.json(quiz);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/quizzes', async (req, res) => {
+  try {
+    const created = await createQuiz(req.body);
+    res.status(201).json(created);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.put('/api/quizzes/:id', async (req, res) => {
+  try {
+    const updated = await updateQuiz(req.params.id, req.body);
+    if (!updated) return res.status(404).json({ error: 'Quiz not found' });
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.get('/api/quizzes/:id/public', async (req, res) => {
+  try {
+    const quiz = await getPublicQuiz(req.params.id);
+    if (!quiz) return res.status(404).json({ error: 'Quiz not available' });
+    res.json(quiz);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/quizzes/:id/sessions', async (req, res) => {
+  try {
+    const sessions = await getQuizSessions(req.params.id);
+    res.json(sessions);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/quizzes/:id/sessions', async (req, res) => {
+  try {
+    const created = await createQuizSession(req.params.id, req.body || {});
+    if (!created) return res.status(404).json({ error: 'Quiz not found' });
+    res.status(201).json(created);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.get('/api/quiz-sessions/:token/public', async (req, res) => {
+  try {
+    const quiz = await getPublicQuizBySessionToken(req.params.token);
+    if (!quiz) return res.status(404).json({ error: 'Quiz session not available' });
+    res.json(quiz);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/quiz-sessions/:token/submissions', async (req, res) => {
+  try {
+    const submitted = await submitQuizBySessionToken(req.params.token, req.body);
+    if (!submitted) return res.status(404).json({ error: 'Quiz session not available' });
+    res.status(201).json(submitted);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.post('/api/quizzes/:id/submissions', async (req, res) => {
+  try {
+    const submitted = await submitQuiz(req.params.id, req.body);
+    if (!submitted) return res.status(404).json({ error: 'Quiz not available' });
+    res.status(201).json(submitted);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+app.get('/api/quizzes/:id/submissions', async (req, res) => {
+  try {
+    const data = await getQuizSubmissions(req.params.id);
+    if (!data) return res.status(404).json({ error: 'Quiz not found' });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/quizzes/:id/sessions/:sessionId/submissions', async (req, res) => {
+  try {
+    const data = await getQuizSessionSubmissions(req.params.id, req.params.sessionId);
+    if (!data) return res.status(404).json({ error: 'Quiz session not found' });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/quizzes/:id/public-results', async (req, res) => {
+  try {
+    const data = await getPublicQuizResults(req.params.id);
+    if (!data) return res.status(404).json({ error: 'Quiz not found' });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/quiz-sessions/:token/public-results', async (req, res) => {
+  try {
+    const data = await getPublicQuizResultsBySessionToken(req.params.token);
+    if (!data) return res.status(404).json({ error: 'Quiz session not found' });
+    res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -105,8 +358,15 @@ if (isProduction) {
   });
 }
 
-app.listen(PORT, () => {
-  console.log(isProduction
-    ? `Zoo booking running at http://localhost:${PORT}`
-    : `Zoo booking API at http://localhost:${PORT}`);
-});
+Promise.all([initializeBookingDb(), initializeQuizDb(), initializeEvaluationDb()])
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(isProduction
+        ? `Zoo booking running at http://localhost:${PORT}`
+        : `Zoo booking API at http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Failed to initialize database:', err.message);
+    process.exit(1);
+  });

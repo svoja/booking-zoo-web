@@ -7,6 +7,10 @@
     "build": "cd frontend && npm run build",
     "start": "node backend/server.js",
     "dev:backend": "cd backend && npm run dev",
-    "dev:frontend": "cd frontend && npm run dev"
+    "dev:frontend": "cd frontend && npm run dev",
+    "docker:up": "docker compose up -d --build",
+    "docker:down": "docker compose down",
+    "docker:dev:up": "docker compose -p booking-zoo-web-dev -f docker-compose.dev.yml up -d --build",
+    "docker:dev:down": "docker compose -p booking-zoo-web-dev -f docker-compose.dev.yml down"
   }
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createBooking } from '../api';
 
@@ -25,7 +25,7 @@ const ADDONS = [
   },
   {
     key: 'serviceWaterPark',
-    label: 'Zoo shuttle bus',
+    label: 'รถรับส่งสวนสัตว์',
     studentPrice: 10,
     teacherPrice: 25,
   },
@@ -99,9 +99,9 @@ export default function BookingForm() {
       };
       const created = await createBooking(body);
       setForm(defaultValues);
-      navigate(`/booking/${created.id}`);
+      navigate(`/features/booking/booking/${created.id}`);
     } catch (err) {
-      setError(err.message || 'Failed to save booking');
+      setError(err.message || 'บันทึกการจองไม่สำเร็จ');
     } finally {
       setSaving(false);
     }
@@ -109,48 +109,48 @@ export default function BookingForm() {
 
   return (
     <div className="pb-8">
-      <h1 className="mb-1 text-3xl font-bold text-[#2d5a3a]">Create Booking</h1>
-      <p className="mb-5 text-slate-600">Fill in school, contact, participants, and service details.</p>
+      <h1 className="mb-1 text-3xl font-bold text-[#2d5a3a]">สร้างรายการจอง</h1>
+      <p className="mb-5 text-slate-600">กรอกข้อมูลโรงเรียน ผู้ติดต่อ จำนวนผู้เข้าชม และบริการที่ต้องการ</p>
 
       <form onSubmit={handleSubmit} className="grid gap-4">
         {error ? <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</div> : null}
 
         <section className={cardClass}>
-          <h2 className="text-base font-semibold text-[#2d5a3a]">School Information</h2>
-          <label className={labelClass}>School / Address / Organization *</label>
+          <h2 className="text-base font-semibold text-[#2d5a3a]">ข้อมูลโรงเรียน</h2>
+          <label className={labelClass}>ชื่อโรงเรียน / ที่อยู่ / หน่วยงาน *</label>
           <textarea
             value={form.schoolName}
             onChange={(e) => update('schoolName', e.target.value)}
-            placeholder="Example School, Muang District, Chiang Mai"
+            placeholder="ตัวอย่าง: โรงเรียนเชียงใหม่วิทยา อ.เมือง จ.เชียงใหม่"
             rows={2}
             required
             className={fieldClass}
           />
 
-          <label className={labelClass}>Grade level</label>
+          <label className={labelClass}>ระดับชั้น</label>
           <input
             type="text"
             value={form.gradeLevel}
             onChange={(e) => update('gradeLevel', e.target.value)}
-            placeholder="e.g. Grade 1-3"
+            placeholder="เช่น ป.1-ป.3"
             className={fieldClass}
           />
         </section>
 
         <section className={cardClass}>
-          <h2 className="text-base font-semibold text-[#2d5a3a]">Contact Person</h2>
-          <label className={labelClass}>Name</label>
+          <h2 className="text-base font-semibold text-[#2d5a3a]">ผู้ประสานงาน</h2>
+          <label className={labelClass}>ชื่อผู้ติดต่อ</label>
           <input
             type="text"
             value={form.contactName}
             onChange={(e) => update('contactName', e.target.value)}
-            placeholder="Full name"
+            placeholder="ชื่อ-นามสกุล"
             className={fieldClass}
           />
 
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-[#2d5a3a]">Phone 1</label>
+              <label className="block text-sm font-medium text-[#2d5a3a]">เบอร์โทร 1</label>
               <input
                 type="tel"
                 value={form.contactPhone1}
@@ -160,7 +160,7 @@ export default function BookingForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#2d5a3a]">Phone 2</label>
+              <label className="block text-sm font-medium text-[#2d5a3a]">เบอร์โทร 2</label>
               <input
                 type="tel"
                 value={form.contactPhone2}
@@ -173,10 +173,10 @@ export default function BookingForm() {
         </section>
 
         <section className={cardClass}>
-          <h2 className="text-base font-semibold text-[#2d5a3a]">Participants</h2>
+          <h2 className="text-base font-semibold text-[#2d5a3a]">จำนวนผู้เข้าชม</h2>
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-[#2d5a3a]">Students</label>
+              <label className="block text-sm font-medium text-[#2d5a3a]">นักเรียน</label>
               <input
                 type="number"
                 min="0"
@@ -187,7 +187,7 @@ export default function BookingForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#2d5a3a]">Teachers/Guardians</label>
+              <label className="block text-sm font-medium text-[#2d5a3a]">ครู/ผู้ปกครอง</label>
               <input
                 type="number"
                 min="0"
@@ -200,23 +200,23 @@ export default function BookingForm() {
           </div>
 
           <div className="mt-4 rounded-lg border border-[#d4e0d4] bg-[#f7fbf6] p-3 text-sm text-slate-700">
-            <p className="font-semibold text-[#2d5a3a]">Cost Summary</p>
-            <p>Students: {studentsCount} x {formatCurrency(STUDENT_PRICE)} = {formatCurrency(studentCost)}</p>
-            <p>Teachers: {teachersCount} x {formatCurrency(TEACHER_PRICE)} = {formatCurrency(teacherCost)}</p>
-            <p>Total people: {totalPeople}</p>
-            <p>Base service: {formatCurrency(baseCost)}</p>
+            <p className="font-semibold text-[#2d5a3a]">สรุปค่าใช้จ่าย</p>
+            <p>นักเรียน: {studentsCount} x {formatCurrency(STUDENT_PRICE)} = {formatCurrency(studentCost)}</p>
+            <p>ครู/ผู้ปกครอง: {teachersCount} x {formatCurrency(TEACHER_PRICE)} = {formatCurrency(teacherCost)}</p>
+            <p>รวมจำนวนคน: {totalPeople}</p>
+            <p>ค่าบริการพื้นฐาน: {formatCurrency(baseCost)}</p>
             {addonSummaries.map((addon) => (
               <p key={addon.key}>
-                Add-on {addon.label}: {formatCurrency(addon.addonTotalCost)}
+                บริการเสริม {addon.label}: {formatCurrency(addon.addonTotalCost)}
               </p>
             ))}
-            <p>Add-on total: {formatCurrency(addonTotalCost)}</p>
-            <p className="text-base font-bold text-[#2d5a3a]">Grand total: {formatCurrency(totalCost)}</p>
+            <p>รวมค่าบริการเสริม: {formatCurrency(addonTotalCost)}</p>
+            <p className="text-base font-bold text-[#2d5a3a]">ยอดรวมทั้งหมด: {formatCurrency(totalCost)}</p>
           </div>
         </section>
 
         <section className={cardClass}>
-          <h2 className="text-base font-semibold text-[#2d5a3a]">Services</h2>
+          <h2 className="text-base font-semibold text-[#2d5a3a]">บริการที่ต้องการ</h2>
           <div className="mt-3 grid gap-2 sm:grid-cols-2">
             {ADDONS.map((addon) => (
               <label key={addon.key} className="flex items-center gap-2 rounded-lg border border-[#d4e0d4] bg-[#f7fbf6] px-3 py-2 text-sm">
@@ -232,19 +232,19 @@ export default function BookingForm() {
         </section>
 
         <section className={cardClass}>
-          <h2 className="text-base font-semibold text-[#2d5a3a]">Booking Meta</h2>
-          <label className={labelClass}>Receiver name</label>
+          <h2 className="text-base font-semibold text-[#2d5a3a]">ข้อมูลการรับจอง</h2>
+          <label className={labelClass}>ชื่อผู้รับเรื่อง</label>
           <input
             type="text"
             value={form.receiverName}
             onChange={(e) => update('receiverName', e.target.value)}
-            placeholder="Officer name"
+            placeholder="ชื่อเจ้าหน้าที่"
             className={fieldClass}
           />
 
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-medium text-[#2d5a3a]">Received date</label>
+              <label className="block text-sm font-medium text-[#2d5a3a]">วันที่รับจอง</label>
               <input
                 type="date"
                 value={form.bookingReceivedAt}
@@ -253,7 +253,7 @@ export default function BookingForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-[#2d5a3a]">Visit date</label>
+              <label className="block text-sm font-medium text-[#2d5a3a]">วันที่เข้าชม</label>
               <input
                 type="date"
                 value={form.visitDate}
@@ -263,16 +263,16 @@ export default function BookingForm() {
             </div>
           </div>
 
-          <label className={labelClass}>Visit time</label>
+          <label className={labelClass}>เวลาเข้าชม</label>
           <input
             type="text"
             value={form.visitTime}
             onChange={(e) => update('visitTime', e.target.value)}
-            placeholder="e.g. 08:00"
+            placeholder="เช่น 08:00"
             className={fieldClass}
           />
 
-          <label className={labelClass}>Remarks</label>
+          <label className={labelClass}>หมายเหตุ</label>
           <textarea
             value={form.remarks}
             onChange={(e) => update('remarks', e.target.value)}
@@ -287,14 +287,14 @@ export default function BookingForm() {
             disabled={saving}
             className="rounded-lg bg-[#4a7c59] px-4 py-2 text-sm font-semibold text-white hover:bg-[#2d5a3a] disabled:opacity-60"
           >
-            {saving ? 'Saving...' : 'Save booking'}
+            {saving ? 'กำลังบันทึก...' : 'บันทึกรายการจอง'}
           </button>
           <button
             type="button"
-            onClick={() => navigate('/list')}
+            onClick={() => navigate('/features/booking/list')}
             className="rounded-lg border border-[#4a7c59]/25 bg-[#4a7c59]/10 px-4 py-2 text-sm font-semibold text-[#2d5a3a] hover:bg-[#4a7c59]/20"
           >
-            View bookings
+            ดูรายการจอง
           </button>
         </div>
       </form>
